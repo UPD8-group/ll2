@@ -1,0 +1,25 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  included_files = ["prompts/**", "netlify/functions/lib/**"]
+  node_bundler = "esbuild"
+
+[functions."generate-report"]
+  timeout = 10
+
+[functions."report-status"]
+  timeout = 10
+
+# Background function — Netlify auto-detects -background suffix, gives 15 min timeout
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
