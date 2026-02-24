@@ -8,7 +8,7 @@
 
 const crypto = require('crypto');
 const { getStore } = require('@netlify/blobs');
-const SITE_ID = '723a91f3-c306-48fd-b0d7-382ba89fb9a0';
+const SITE_ID = 'b95526e0-71f5-445b-97fb-eac488509a38';
 
 exports.handler = async (event) => {
     const headers = {
