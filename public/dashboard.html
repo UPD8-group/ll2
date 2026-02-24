@@ -263,9 +263,12 @@
     <div class="loading-sub">Our AI is reviewing your screenshots, searching public databases, and building your buyer intelligence report. This usually takes 30–90 seconds.</div>
     <div class="loading-steps">
         <div class="loading-step" id="ls1"><span class="check"></span> Reading screenshots</div>
-        <div class="loading-step" id="ls2"><span class="check"></span> Searching public records &amp; databases</div>
-        <div class="loading-step" id="ls3"><span class="check"></span> Analysing pricing &amp; market data</div>
-        <div class="loading-step" id="ls4"><span class="check"></span> Generating your report</div>
+        <div class="loading-step" id="ls2"><span class="check"></span> Decoding agent speak for hidden meaning</div>
+        <div class="loading-step" id="ls3"><span class="check"></span> Googling "what does 'cosy' actually mean"</div>
+        <div class="loading-step" id="ls4"><span class="check"></span> Checking if the price is insulting or just ambitious</div>
+        <div class="loading-step" id="ls5"><span class="check"></span> Consulting our team of extremely opinionated experts</div>
+        <div class="loading-step" id="ls6"><span class="check"></span> Stress-testing the negotiation strategy</div>
+        <div class="loading-step" id="ls7"><span class="check"></span> Generating your report</div>
     </div>
 </div>
 
@@ -508,15 +511,19 @@ function handleBetaSubmit() { generateReport(null); }
 
 // LOADING STEPS
 function startLoadingSteps() {
-    ['ls1','ls2','ls3','ls4'].forEach(function(id) {
+    ['ls1','ls2','ls3','ls4','ls5','ls6','ls7'].forEach(function(id) {
         var el = document.getElementById(id);
         el.classList.remove('active','done');
         el.querySelector('.check').textContent = '';
     });
     setStepActive('ls1');
     loadingStepTimers = [
-        setTimeout(function() { advanceStep('ls1','ls2'); }, 4000),
-        setTimeout(function() { advanceStep('ls2','ls3'); }, 12000)
+        setTimeout(function() { advanceStep('ls1','ls2'); },  3000),
+        setTimeout(function() { advanceStep('ls2','ls3'); },  8000),
+        setTimeout(function() { advanceStep('ls3','ls4'); }, 15000),
+        setTimeout(function() { advanceStep('ls4','ls5'); }, 24000),
+        setTimeout(function() { advanceStep('ls5','ls6'); }, 35000),
+        setTimeout(function() { advanceStep('ls6','ls7'); }, 48000)
     ];
 }
 function setStepActive(id) { document.getElementById(id).classList.add('active'); }
@@ -529,13 +536,13 @@ function advanceStep(fromId, toId) {
 function completeAllSteps() {
     loadingStepTimers.forEach(function(t) { clearTimeout(t); });
     loadingStepTimers = [];
-    ['ls1','ls2','ls3'].forEach(function(id) {
+    ['ls1','ls2','ls3','ls4','ls5','ls6'].forEach(function(id) {
         var el = document.getElementById(id);
         el.classList.remove('active'); el.classList.add('done');
         el.querySelector('.check').textContent = '✓';
     });
-    advanceStep('ls3','ls4');
-    return new Promise(function(resolve) { setTimeout(function() { advanceStep('ls4', null); resolve(); }, 600); });
+    advanceStep('ls6','ls7');
+    return new Promise(function(resolve) { setTimeout(function() { advanceStep('ls7', null); resolve(); }, 600); });
 }
 
 // ============================================================
@@ -620,11 +627,6 @@ async function pollForReport(jobId) {
         var data = await res.json();
         if (data.status === 'complete') return { format: 'html', reportId: data.reportId, html: data.html };
         if (data.status === 'error') throw new Error(data.error || 'Report generation failed');
-        // Advance UI steps
-        var elapsed = (i + 1) * interval;
-        if (elapsed >= 4000  && elapsed < 4500)  advanceStep('ls1', 'ls2');
-        if (elapsed >= 12000 && elapsed < 12500) advanceStep('ls2', 'ls3');
-        if (elapsed >= 25000 && elapsed < 25500) advanceStep('ls3', 'ls4');
     }
     throw new Error('Report generation timed out. Please try again.');
 }
@@ -705,7 +707,7 @@ function resetForm() {
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
     document.getElementById('formContainer').style.display = '';
-    ['ls1','ls2','ls3','ls4'].forEach(function(id) {
+    ['ls1','ls2','ls3','ls4','ls5','ls6','ls7'].forEach(function(id) {
         var el = document.getElementById(id);
         el.classList.remove('active','done');
         el.querySelector('.check').textContent = '';
