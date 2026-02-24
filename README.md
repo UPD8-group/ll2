@@ -31,5 +31,12 @@ Flow:
 
 ## Site ID (Netlify Blobs)
 
-Hardcoded in functions: `723a91f3-c306-48fd-b0d7-382ba89fb9a0`
-Update if site is recreated.
+Hardcoded in all four functions:
+- `netlify/functions/upload-screenshots.js`
+- `netlify/functions/generate-report.js`
+- `netlify/functions/generate-report-background.js`
+- `netlify/functions/report-status.js`
+
+Current Site ID: `b95526e0-71f5-445b-97fb-eac488509a38`
+
+⚠️ **DO NOT rename or recreate the Netlify site.** If you do, a new Site ID is generated and Blobs authentication will fail with a 401 error. If the site is ever recreated, you must update the Site ID in all four function files above AND regenerate the Netlify personal access token.
