@@ -66,7 +66,7 @@ exports.handler = async (event) => {
 
         const store = getStore({
             name: 'listing-lens-sessions',
-            siteID: '723a91f3-c306-48fd-b0d7-382ba89fb9a0',
+            siteID: 'b95526e0-71f5-445b-97fb-eac488509a38',
             token: process.env.NETLIFY_TOKEN
         });
 
