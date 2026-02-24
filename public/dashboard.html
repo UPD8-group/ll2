@@ -637,15 +637,34 @@ function renderReport(r) {
         currentReportHtml = r.html;
         currentReportId   = r.reportId || 'LL-REPORT';
         frame.srcdoc      = r.html;
+
+        // ── IFRAME HEIGHT FIX ──────────────────────────────────────────────
+        // Problem: onload fires before the iframe has fully painted on some
+        // browsers, so scrollHeight reads as 0 or a tiny number.
+        // Fix: measure immediately with a guard, then re-measure at 500ms to
+        // catch reports that finish painting after the initial onload event.
         frame.onload = function() {
             try {
                 var doc = frame.contentDocument;
                 doc.documentElement.style.overflow = 'hidden';
                 doc.body.style.overflow = 'hidden';
                 var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+                if (h < 100) h = 4000; // content hasn't painted yet — use safe fallback
                 frame.style.height = (h + 32) + 'px';
-            } catch (e) { frame.style.height = '4000px'; }
+            } catch (e) {
+                frame.style.height = '4000px';
+            }
+            // Re-check after 500ms — catches late-painting content
+            setTimeout(function() {
+                try {
+                    var doc = frame.contentDocument;
+                    var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+                    if (h > 100) frame.style.height = (h + 32) + 'px';
+                } catch (e) {}
+            }, 500);
         };
+        // ── END IFRAME HEIGHT FIX ──────────────────────────────────────────
+
     } else {
         currentReportHtml = '<html><body><pre style="padding:24px;font-family:monospace;font-size:13px;">' + esc(JSON.stringify(r, null, 2)) + '</pre></body></html>';
         currentReportId   = 'LL-REPORT';
