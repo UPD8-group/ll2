@@ -694,6 +694,12 @@ function completeTicker() {
 }
 
 // ─── GENERATE REPORT ─────────────────────────────────────────────────────────
+// Architecture:
+//   1. Validate session → get jobId  (/api/generate-report)
+//   2. Browser fires background fn   (/.netlify/functions/stream-report-background)
+//      → returns 202 immediately, Claude runs async, stores result in Blobs
+//   3. Browser polls /api/report-status every 3s
+//   4. When complete, animate HTML into right panel, then reveal full report
 async function generateReport(paymentId) {
     document.getElementById('formContainer').style.display = 'none';
     document.getElementById('genOverlay').classList.add('active');
@@ -711,70 +717,54 @@ async function generateReport(paymentId) {
             sid = upData.sessionId;
         }
 
-        // Call streaming endpoint — waits for Claude to finish, returns all chunks
-        var streamRes = await fetch('/.netlify/functions/stream-report-background', {
+        // Step 1: Validate session, get jobId
+        var validateRes = await fetch('/api/generate-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, paymentIntentId: paymentId })
+            body: JSON.stringify({ sessionId: sid })
         });
-
-        if (streamRes.status === 410) {
-            var errData = await streamRes.json().catch(function() { return {}; });
-            throw new Error('EXPIRED:' + (errData.message || 'Session expired.'));
+        if (!validateRes.ok) {
+            var errData = await validateRes.json().catch(function() { return {}; });
+            if (validateRes.status === 410) throw new Error('EXPIRED:' + (errData.message || 'Session expired.'));
+            throw new Error(errData.error || 'HTTP ' + validateRes.status);
         }
-        if (!streamRes.ok) {
-            var errData = await streamRes.json().catch(function() { return {}; });
-            throw new Error(errData.error || 'HTTP ' + streamRes.status);
-        }
+        var validateData = await validateRes.json();
+        var jobId = validateData.jobId;
 
-        // Parse SSE body — all chunks returned at once, we animate the assembly
-        var responseText = await streamRes.text();
-        var lines = responseText.split('\n');
-        var chunks = [];
-        var reportId = 'LL-REPORT';
+        // Step 2: Fire background function — returns 202, runs async
+        fetch('/.netlify/functions/stream-report-background', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jobId: jobId, sessionId: sid, paymentIntentId: paymentId })
+        }).catch(function(e) { console.warn('Background fn fetch error (expected):', e.message); });
 
-        lines.forEach(function(line) {
-            if (!line.startsWith('data: ')) return;
-            try {
-                var ev = JSON.parse(line.slice(6));
-                if (ev.type === 'chunk') chunks.push(ev.text);
-                if (ev.type === 'done') reportId = ev.reportId || reportId;
-                if (ev.type === 'error') throw new Error(ev.message);
-            } catch(e) {
-                if (e.message && !e.message.includes('JSON')) throw e;
-            }
-        });
+        // Step 3: Poll until done
+        var report = await pollForReport(jobId);
 
-        if (chunks.length === 0) throw new Error('No report content received');
-
-        // Store full HTML for download
-        var fullHtml = chunks.join('');
+        // Step 4: Animate report into right panel
+        var fullHtml = report.html;
         currentReportHtml = fullHtml;
-        currentReportId   = reportId;
+        currentReportId   = report.reportId || 'LL-REPORT';
 
-        // Animate assembly into RIGHT PANEL live iframe
         var segments = [];
         var segSize = 80;
         for (var i = 0; i < fullHtml.length; i += segSize) {
             segments.push(fullHtml.substring(i, i + segSize));
         }
 
-        var liveFrame  = document.getElementById('liveFrame');
-        var emptyState = document.getElementById('genRightEmpty');
-        var assembled  = '';
-        var segIdx     = 0;
+        var liveFrame    = document.getElementById('liveFrame');
+        var emptyState   = document.getElementById('genRightEmpty');
+        var assembled    = '';
+        var segIdx       = 0;
         var frameVisible = false;
 
         await new Promise(function(resolve) {
             function writeNext() {
                 if (segIdx >= segments.length) { resolve(); return; }
-
                 assembled += segments[segIdx];
                 segIdx++;
 
-                // Update live iframe every 6 segments
                 if (segIdx % 6 === 0 || segIdx === segments.length) {
-                    // Once body is open, show the frame
                     if (!frameVisible && assembled.indexOf('<body') !== -1) {
                         frameVisible = true;
                         emptyState.classList.add('hidden');
@@ -785,7 +775,7 @@ async function generateReport(paymentId) {
                     }
                 }
 
-                // Drive pct from 88 → 99 as segments write
+                // Drive pct 88→99 during animation
                 var segPct = 88 + Math.floor((segIdx / segments.length) * 11);
                 if (segPct > currentPct) {
                     currentPct = segPct;
@@ -793,20 +783,16 @@ async function generateReport(paymentId) {
                     document.getElementById('genBar').style.width = Math.floor(currentPct) + '%';
                 }
 
-                // Fast at start (CSS), steady through content
-                var delay = segIdx < segments.length * 0.25 ? 3 : 10;
+                var delay = segIdx < segments.length * 0.25 ? 3 : 8;
                 setTimeout(writeNext, delay);
             }
             writeNext();
         });
 
-        // Set final complete HTML
         liveFrame.srcdoc = fullHtml;
-
-        // Snap ticker to 100%
         await completeTicker();
 
-        // Close overlay — transition to main report view
+        // Transition to final report view
         document.getElementById('genOverlay').classList.remove('active');
         document.body.classList.add('report-active');
 
@@ -815,7 +801,6 @@ async function generateReport(paymentId) {
         mainFrame.srcdoc = fullHtml;
         container.classList.add('active');
 
-        // Size main iframe
         setTimeout(function() {
             try {
                 var doc = mainFrame.contentDocument;
@@ -840,7 +825,7 @@ async function generateReport(paymentId) {
     }
 }
 
-// Legacy poll function kept for reference but no longer called
+// Poll every 3s, timeout after 3 min
 async function pollForReport(jobId) {
     var maxAttempts = 60;
     for (var i = 0; i < maxAttempts; i++) {
