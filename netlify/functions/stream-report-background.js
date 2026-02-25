@@ -1,16 +1,12 @@
 /**
- * LISTING LENS — Stream Report
+ * LISTING LENS — Stream Report Background Function
  *
- * Streams Claude's response token-by-token via Server-Sent Events.
- * Browser receives the HTML report as it's generated — user sees it build live.
+ * Background function that runs Claude and stores result in Blobs.
+ * Returns 202 immediately (Netlify requirement for background functions).
+ * Frontend polls /api/report-status for completion.
  *
- * Route: POST /api/stream-report
- * Body:  { sessionId, paymentIntentId }
- *
- * SSE events:
- *   data: {"type":"chunk","text":"..."}   — HTML fragment
- *   data: {"type":"done","reportId":"LL-XXXXX"}
- *   data: {"type":"error","message":"..."}
+ * Route: POST /.netlify/functions/stream-report-background
+ * Body:  { sessionId, paymentIntentId, jobId }
  */
 
 const Anthropic    = require('@anthropic-ai/sdk');
@@ -55,40 +51,40 @@ async function verifyPayment(paymentIntentId) {
 }
 
 exports.handler = async (event) => {
-    const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-    };
-
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers: corsHeaders, body: '' };
-    }
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Method not allowed' }) };
-    }
+    // Background functions MUST return 202 immediately
+    // All work happens after this return (Netlify keeps the function running)
 
     const store = blobStore();
+    let jobId = null;
 
     try {
         const body      = JSON.parse(event.body || '{}');
+        jobId           = body.jobId;
         const sessionId = body.sessionId;
         const paymentId = body.paymentIntentId;
 
-        if (!sessionId) {
-            return { statusCode: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'sessionId required' }) };
+        if (!jobId || !sessionId) {
+            console.error('Missing jobId or sessionId');
+            return { statusCode: 202 };
         }
+
+        console.log('Job ' + jobId + ': starting');
+        await store.setJSON('job/' + jobId, { status: 'processing', startedAt: new Date().toISOString() });
 
         // Verify payment
         const payment = await verifyPayment(paymentId);
         if (!payment.valid) {
-            return { statusCode: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Payment verification failed: ' + payment.reason }) };
+            console.error('Job ' + jobId + ': payment failed: ' + payment.reason);
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Payment verification failed: ' + payment.reason });
+            return { statusCode: 202 };
         }
 
-        // Load session
+        // Load session metadata
         let meta;
         try { meta = await store.get(sessionId + '/meta', { type: 'json' }); } catch (_) { meta = null; }
         if (!meta) {
-            return { statusCode: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Session expired', message: 'Please re-upload your screenshots.' }) };
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Session expired' });
+            return { statusCode: 202 };
         }
 
         // Load screenshots
@@ -105,47 +101,52 @@ exports.handler = async (event) => {
         }
 
         if (screenshots.length === 0) {
-            return { statusCode: 410, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Screenshots expired or missing' }) };
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Screenshots expired or missing' });
+            return { statusCode: 202 };
         }
 
         // Load prompt
         let systemPrompt = loadPrompt('fast-universal-v2.md');
         if (!systemPrompt) {
-            return { statusCode: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Prompt file missing' }) };
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing' });
+            return { statusCode: 202 };
         }
 
         const reportId = 'LL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
         const today    = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
+        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
 
-        // Stream from Claude
-        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-        const stream = await client.messages.stream({
+        console.log('Job ' + jobId + ': calling Claude, ' + screenshots.length + ' screenshot(s)');
+
+        const client   = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+        const response = await client.messages.create({
             model:      'claude-sonnet-4-6',
             max_tokens: 6000,
             system:     systemPrompt,
             messages:   [{
                 role: 'user',
                 content: [
-                    ...screenshots.map(s => ({ type: 'image', source: { type: 'base64', media_type: s.mimeType, data: s.base64 } })),
+                    ...screenshots.map(function(s) {
+                        return { type: 'image', source: { type: 'base64', media_type: s.mimeType, data: s.base64 } };
+                    }),
                     { type: 'text', text: 'Analyse this listing and generate the complete Listing Lens buyer intelligence report as standalone HTML.' }
                 ]
             }]
         });
 
-        // Collect full HTML while streaming
-        let fullHtml = '';
-        const chunks = [];
+        let html = response.content.filter(function(b) { return b.type === 'text'; }).map(function(b) { return b.text; }).join('');
+        html = html.replace(/```html\n?/g, '').replace(/```\n?/g, '').trim();
+        const start = html.indexOf('<!DOCTYPE html>') !== -1 ? html.indexOf('<!DOCTYPE html>') : html.indexOf('<html');
+        const end   = html.lastIndexOf('</html>');
+        if (start !== -1 && end !== -1) html = html.substring(start, end + 7);
 
-        for await (const event of stream) {
-            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                const text = event.delta.text;
-                fullHtml += text;
-                chunks.push(JSON.stringify({ type: 'chunk', text }));
-            }
-        }
-
-        chunks.push(JSON.stringify({ type: 'done', reportId }));
+        console.log('Job ' + jobId + ': storing report (' + html.length + ' chars)');
+        await store.setJSON('job/' + jobId, {
+            status: 'complete',
+            reportId: reportId,
+            html: html,
+            completedAt: new Date().toISOString()
+        });
 
         // Cleanup screenshots
         try {
@@ -155,31 +156,14 @@ exports.handler = async (event) => {
             await Promise.all(deletes);
         } catch (_) {}
 
-        // Return as SSE body — Netlify doesn't support true streaming but
-        // we return all chunks at once, which the client reassembles.
-        // For true streaming, this function would need to be replaced with
-        // an edge function. This approach gives the same result with a single
-        // response delivery — client animates the assembly.
-        const sseBody = chunks.map(c => 'data: ' + c).join('\n\n') + '\n\n';
-
-        return {
-            statusCode: 200,
-            headers: {
-                ...corsHeaders,
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache',
-                'X-Report-Id': reportId,
-            },
-            body: sseBody
-        };
+        console.log('Job ' + jobId + ': complete ✓');
 
     } catch (err) {
-        console.error('Stream error:', err.message);
-        const errBody = 'data: ' + JSON.stringify({ type: 'error', message: err.message || 'Unknown error' }) + '\n\n';
-        return {
-            statusCode: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
-            body: errBody
-        };
+        console.error('Job ' + (jobId || '?') + ' error:', err.message);
+        try {
+            if (jobId) await store.setJSON('job/' + jobId, { status: 'error', error: err.message || 'Unknown error' });
+        } catch (_) {}
     }
+
+    return { statusCode: 202 };
 };
