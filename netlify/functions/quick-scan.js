@@ -108,6 +108,11 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ title: 'Reading listing...' }) };
         }
 
+        // Cache the detected category so stream-report-background can route to the right prompt
+        try {
+            await store.setJSON('qs/' + sessionId, { category: parsed.category || '' });
+        } catch (e) {}
+
         return { statusCode: 200, headers, body: JSON.stringify(parsed) };
 
     } catch (err) {
