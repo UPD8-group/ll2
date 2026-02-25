@@ -1,6 +1,6 @@
 /**
- * LISTING LENS — Upload Screenshots
- * Stores screenshots in Netlify Blobs with 15-min session.
+ * LISTING LENS — Upload Screenshots v2.0
+ * Category removed — Claude auto-detects from screenshot.
  */
 
 const Busboy     = require('busboy');
@@ -10,7 +10,6 @@ const { getStore } = require('@netlify/blobs');
 const MAX_FILES      = 6;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const VALID_MIME     = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const VALID_CATS     = ['vehicle', 'property', 'electronics', 'other'];
 const SESSION_TTL_MS = 15 * 60 * 1000;
 
 function parseMultipart(event) {
@@ -53,11 +52,8 @@ exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
     try {
-        const { fields, files } = await parseMultipart(event);
-        const category = fields.category;
+        const { files } = await parseMultipart(event);
 
-        if (!category || !VALID_CATS.includes(category))
-            return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid category' }) };
         if (files.length === 0)
             return { statusCode: 400, headers, body: JSON.stringify({ error: 'No valid images uploaded' }) };
 
@@ -79,7 +75,6 @@ exports.handler = async (event) => {
         );
 
         await store.setJSON(sessionId + '/meta', {
-            category,
             screenshotCount: files.length,
             expiresAt,
             createdAt: new Date().toISOString()
@@ -91,7 +86,6 @@ exports.handler = async (event) => {
             body: JSON.stringify({
                 sessionId,
                 screenshotCount: files.length,
-                category,
                 expiresInSeconds: 900,
                 message: 'Screenshots stored. Session expires in 15 minutes.'
             })
