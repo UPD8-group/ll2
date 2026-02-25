@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listing Lens — Digital Forensic Scan</title>
+    <style>
+        :root {
+            --bg: #0A0A0A; --accent: #4ade80; --text: #FFFFFF;
+            --panel-bg: #111111; --border: rgba(255,255,255,0.1);
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; }
+        
+        /* The Split Screen */
+        .app-container { display: flex; height: 100vh; }
+        
+        /* Left: The Ticker */
+        .sidebar { width: 350px; background: var(--panel-bg); border-right: 1px solid var(--border); padding: 40px; display: flex; flex-direction: column; }
+        .ticker-log { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); margin-top: auto; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--accent); font-size: 10px; margin-bottom: 20px; }
+
+        /* Right: The Viewport */
+        .viewport { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
+        
+        /* The "Lens" Reticle Overlay */
+        .scanner-overlay {
+            position: absolute; inset: 0;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            background: linear-gradient(to bottom, transparent 50%, rgba(74, 222, 128, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .scan-line {
+            position: absolute; width: 100%; height: 2px; background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            animation: moveScan 4s linear infinite;
+        }
+        @keyframes moveScan { from { top: 0; } to { top: 100%; } }
+
+        #upload-preview { max-width: 80%; max-height: 80%; border: 1px solid var(--border); transition: opacity 0.5s; }
+        iframe#report-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: none; background: #fff; display: none; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">LISTING LENS</div>
+            <div class="status-badge" id="transparency-verdict">AWAITING INPUT</div>
+            <div class="ticker-log" id="ticker">
+                > Initialising forensic engine...<br>
+                > Ready for image upload.
+            </div>
+            <input type="file" id="file-input" style="margin-top: 20px;">
+        </aside>
+        
+        <main class="viewport">
+            <div class="scanner-overlay" id="reticle" style="display:none;">
+                <div class="scan-line"></div>
+            </div>
+            <img id="upload-preview" src="" style="display:none;">
+            <iframe id="report-frame"></iframe>
+        </main>
+    </div>
+
+    <script>
+        // Logic to toggle scanner and handle OCR stream would go here, 
+        // triggering the 'reticle' display on upload.
+    </script>
+</body>
+</html>
