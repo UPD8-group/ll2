@@ -712,7 +712,7 @@ async function generateReport(paymentId) {
         }
 
         // Call streaming endpoint — waits for Claude to finish, returns all chunks
-        var streamRes = await fetch('/api/stream-report', {
+        var streamRes = await fetch('/.netlify/functions/stream-report-background', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: sid, paymentIntentId: paymentId })
