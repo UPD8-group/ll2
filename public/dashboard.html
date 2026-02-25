@@ -76,18 +76,26 @@
         .payment-error { color: var(--red); font-size: 14px; margin-top: 12px; display: none; }
         .payment-secure { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-        .price-picker { margin-bottom: 20px; }
-        .price-picker-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; }
-        .price-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .price-opt { position: relative; cursor: pointer; }
-        .price-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
-        .price-opt-inner { display: flex; flex-direction: column; align-items: center; padding: 14px 10px 12px; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius); transition: all 0.15s; text-align: center; }
-        .price-opt:hover .price-opt-inner { border-color: var(--accent); }
-        .price-opt input:checked + .price-opt-inner { border-color: var(--accent); background: var(--accent-bg); }
-        .price-opt-amount { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 4px; }
-        .price-opt input:checked + .price-opt-inner .price-opt-amount { color: var(--accent); }
-        .price-opt-tag { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-        .price-opt-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--accent); color: #fff; border-radius: 4px; padding: 2px 6px; margin-bottom: 4px; }
+        /* TIER PICKER */
+        .tier-picker { margin-bottom: 20px; }
+        .tier-picker-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px; }
+        .tier-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .tier-opt { position: relative; cursor: pointer; }
+        .tier-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+        .tier-opt-inner { display: flex; flex-direction: column; padding: 16px 14px 14px; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius); transition: all 0.15s; }
+        .tier-opt:hover .tier-opt-inner { border-color: var(--accent); }
+        .tier-opt input:checked + .tier-opt-inner { border-color: var(--accent); background: var(--accent-bg); }
+        .tier-opt-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+        .tier-opt-price { font-size: 24px; font-weight: 800; color: var(--text); line-height: 1; }
+        .tier-opt input:checked + .tier-opt-inner .tier-opt-price { color: var(--accent); }
+        .tier-opt-name { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .tier-opt input:checked + .tier-opt-inner .tier-opt-name { color: var(--accent); }
+        .tier-opt-features { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+        .tier-opt-features span { display: block; }
+        .tier-opt-features span::before { content: '✓ '; color: var(--accent); font-weight: 700; }
+        .tier-opt-badge { display: inline-block; font-size: 10px; font-weight: 700; background: var(--accent); color: #fff; border-radius: 4px; padding: 2px 6px; margin-bottom: 6px; align-self: flex-start; }
+        /* Legacy price-opt kept for fallback */
+        .price-opt { display: none; }
 
         .beta-banner { background: var(--accent-bg); border: 1px solid rgba(22,128,60,0.2); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 16px; text-align: center; }
         .beta-banner p { font-size: 14px; color: #166534; font-weight: 500; margin: 0; }
@@ -434,22 +442,40 @@
     <!-- PAYMENT (live) -->
     <div class="payment-section" id="paymentSection">
         <div class="payment-box">
-            <div class="price-picker" id="pricePicker">
-                <div class="price-picker-label">Choose what feels right</div>
-                <div class="price-options">
-                    <label class="price-opt">
+            <div class="tier-picker" id="pricePicker">
+                <div class="tier-picker-label">Choose your report</div>
+                <div class="tier-options">
+                    <label class="tier-opt">
                         <input type="radio" name="price" value="200" checked onchange="onPriceChange(this)">
-                        <div class="price-opt-inner"><span class="price-opt-amount">$2</span><span class="price-opt-tag">Covers costs</span></div>
+                        <div class="tier-opt-inner">
+                            <div class="tier-opt-header">
+                                <span class="tier-opt-price">$2</span>
+                                <span class="tier-opt-name">Standard</span>
+                            </div>
+                            <div class="tier-opt-features">
+                                <span>Omission analysis</span>
+                                <span>Disclosure intensity</span>
+                                <span>Market comparables</span>
+                                <span>True cost of ownership</span>
+                                <span>Closer script questions</span>
+                            </div>
+                        </div>
                     </label>
-                    <label class="price-opt">
+                    <label class="tier-opt">
                         <input type="radio" name="price" value="500" onchange="onPriceChange(this)">
-                        <div class="price-opt-inner"><span class="price-opt-amount">$5</span><span class="price-opt-tag">Good value</span></div>
-                    </label>
-                    <label class="price-opt">
-                        <input type="radio" name="price" value="1000" onchange="onPriceChange(this)">
-                        <div class="price-opt-inner">
-                            <div class="price-opt-badge">🙌 Generous</div>
-                            <span class="price-opt-amount">$10</span><span class="price-opt-tag">Helps others</span>
+                        <div class="tier-opt-inner">
+                            <div class="tier-opt-badge">Most popular</div>
+                            <div class="tier-opt-header">
+                                <span class="tier-opt-price">$5</span>
+                                <span class="tier-opt-name">Deep Dive</span>
+                            </div>
+                            <div class="tier-opt-features">
+                                <span>Everything in Standard</span>
+                                <span>Verdict: Proceed / Investigate / Caution</span>
+                                <span>Score with 5-dimension breakdown</span>
+                                <span>9-step investigation gate</span>
+                                <span>Pre-purchase checklist</span>
+                            </div>
                         </div>
                     </label>
                 </div>
@@ -501,13 +527,15 @@
         <div class="gen-pct-label">Analysing your listing</div>
 
         <div class="gen-steps">
-            <div class="gen-step" id="gs1"><div class="gen-step-icon">1</div> Reading your screenshots</div>
-            <div class="gen-step" id="gs2"><div class="gen-step-icon">2</div> Identifying listing type &amp; location</div>
-            <div class="gen-step" id="gs3"><div class="gen-step-icon">3</div> Checking market data &amp; comparables</div>
-            <div class="gen-step" id="gs4"><div class="gen-step-icon">4</div> Flagging what they didn't tell you</div>
-            <div class="gen-step" id="gs5"><div class="gen-step-icon">5</div> Calculating true cost of ownership</div>
-            <div class="gen-step" id="gs6"><div class="gen-step-icon">6</div> Building your negotiation strategy</div>
-            <div class="gen-step" id="gs7"><div class="gen-step-icon">7</div> Generating report</div>
+            <div class="gen-step" id="gs1"><div class="gen-step-icon">1</div> <span id="gs1-lbl">Reading your screenshots</span></div>
+            <div class="gen-step" id="gs2"><div class="gen-step-icon">2</div> <span id="gs2-lbl">Identifying listing type &amp; location</span></div>
+            <div class="gen-step" id="gs3"><div class="gen-step-icon">3</div> <span id="gs3-lbl">Checking market data &amp; comparables</span></div>
+            <div class="gen-step" id="gs4"><div class="gen-step-icon">4</div> <span id="gs4-lbl">Flagging what they didn't tell you</span></div>
+            <div class="gen-step" id="gs5"><div class="gen-step-icon">5</div> <span id="gs5-lbl">Calculating true cost of ownership</span></div>
+            <div class="gen-step" id="gs6"><div class="gen-step-icon">6</div> <span id="gs6-lbl">Building your negotiation strategy</span></div>
+            <div class="gen-step" id="gs7"><div class="gen-step-icon">7</div> <span id="gs7-lbl">Generating report</span></div>
+            <div class="gen-step" id="gs8" style="display:none"><div class="gen-step-icon">8</div> <span id="gs8-lbl">Writing pre-purchase checklist</span></div>
+            <div class="gen-step" id="gs9" style="display:none"><div class="gen-step-icon">9</div> <span id="gs9-lbl">Assembling deep dive report</span></div>
         </div>
     </div>
 
@@ -618,6 +646,7 @@ var elements           = null;
 var paymentElement     = null;
 var clientSecret       = null;
 var paymentIntentId    = null;
+var selectedTier       = 'standard'; // 'standard' or 'deep-dive'
 var betaMode           = false;
 var currentReportHtml  = '';
 var currentReportId    = '';
@@ -650,9 +679,13 @@ function onPriceChange(input) {
     var newPrice = parseInt(input.value, 10);
     if (newPrice === selectedPrice) return;
     selectedPrice = newPrice;
-    var labels = { 200: '$2', 500: '$5', 1000: '$10' };
+    selectedTier  = selectedPrice >= 500 ? 'deep-dive' : 'standard';
     var payBtn = document.getElementById('payBtn');
-    if (payBtn) payBtn.textContent = 'Pay ' + (labels[selectedPrice] || '$2') + ' & Generate Report';
+    if (payBtn) {
+        payBtn.textContent = selectedTier === 'deep-dive'
+            ? 'Pay $' + (selectedPrice / 100).toFixed(0) + ' — Get Deep Dive Report'
+            : 'Pay $2 — Get Report';
+    }
     if (stripeInitialised || stripeInitialising) {
         stripe = null; elements = null; paymentElement = null;
         clientSecret = null; paymentIntentId = null;
@@ -829,7 +862,7 @@ function handleBetaSubmit() { generateReport(null); }
 // ─── GROK TICKER ──────────────────────────────────────────────────────────────
 // Eased progress curve: fast start, slows near end, holds just below 99%
 // until the report actually arrives, then snaps to 100%.
-var STEPS = [
+var STEPS_STANDARD = [
     { id: 'gs1', label: 'Scanning listing for observable data',         pct: 10, ms: 0    },
     { id: 'gs2', label: 'Identifying listing type, platform & location', pct: 22, ms: 3000 },
     { id: 'gs3', label: 'Cross-referencing comparable sales & prices',   pct: 38, ms: 7000 },
@@ -838,6 +871,18 @@ var STEPS = [
     { id: 'gs6', label: 'Compiling closer questions & leverage data',    pct: 80, ms: 28000},
     { id: 'gs7', label: 'Assembling intelligence report',                pct: 88, ms: 36000},
 ];
+var STEPS_DEEPDIVE = [
+    { id: 'gs1', label: 'Running 9-step investigation gate',             pct: 8,  ms: 0    },
+    { id: 'gs2', label: 'Identifying listing type, platform & location', pct: 18, ms: 3000 },
+    { id: 'gs3', label: 'Researching recalls, safety notices & ACCC',    pct: 30, ms: 7000 },
+    { id: 'gs4', label: 'Cross-referencing comparable sales & prices',   pct: 42, ms: 13000},
+    { id: 'gs5', label: 'Mapping omissions & photo gaps',                pct: 55, ms: 19000},
+    { id: 'gs6', label: 'Calculating true first-year cost',              pct: 66, ms: 26000},
+    { id: 'gs7', label: 'Forming verdict & scoring dimensions',          pct: 78, ms: 33000},
+    { id: 'gs8', label: 'Writing pre-purchase checklist',               pct: 87, ms: 40000},
+    { id: 'gs9', label: 'Assembling deep dive report',                   pct: 93, ms: 46000},
+];
+var STEPS = selectedTier === 'deep-dive' ? STEPS_DEEPDIVE : STEPS_STANDARD;
 
 var stepTimers = [];
 var pctInterval = null;
@@ -846,10 +891,28 @@ var currentPct = 0;
 var targetPct  = 0;
 
 function startTicker() {
+    // Pick step set based on current tier
+    STEPS = selectedTier === 'deep-dive' ? STEPS_DEEPDIVE : STEPS_STANDARD;
     currentPct = 0; targetPct = 0;
     document.getElementById('genPct').textContent = '0%';
     document.getElementById('genBar').style.width = '0%';
-    document.getElementById('genStatusText').textContent = 'Reading screenshots...';
+    document.getElementById('genStatusText').textContent = selectedTier === 'deep-dive' ? 'Running deep investigation...' : 'Reading screenshots...';
+
+    // Show/hide and relabel steps based on STEPS array
+    // First hide all, then show + label the ones in the current step set
+    for (var i = 1; i <= 9; i++) {
+        var stepEl = document.getElementById('gs' + i);
+        if (stepEl) stepEl.style.display = 'none';
+    }
+    STEPS.forEach(function(s, i) {
+        var stepEl = document.getElementById(s.id);
+        if (stepEl) {
+            stepEl.style.display = '';
+            var lbl = document.getElementById(s.id + '-lbl');
+            if (lbl) lbl.textContent = s.label;
+            stepEl.querySelector('.gen-step-icon').textContent = i + 1;
+        }
+    });
 
     // Reset steps
     STEPS.forEach(function(s) {
@@ -957,7 +1020,7 @@ async function runQuickScan(sessionId) {
         var res = await fetch('/api/quick-scan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sessionId })
+            body: JSON.stringify({ sessionId: sessionId, tier: selectedTier })
         });
         if (!res.ok) return;
         quickScanData = await res.json();
@@ -1289,7 +1352,7 @@ function downloadReport() {
 }
 
 function resetForm() {
-    uploadedFiles = []; sessionId = null; selectedPrice = 200;
+    uploadedFiles = []; sessionId = null; selectedPrice = 200; selectedTier = 'standard';
     stripe = null; elements = null; paymentElement = null;
     clientSecret = null; paymentIntentId = null;
     stripeInitialised = false; stripeInitialising = false; uploadInProgress = false;
