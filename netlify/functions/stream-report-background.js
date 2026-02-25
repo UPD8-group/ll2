@@ -107,7 +107,7 @@ exports.handler = async (event) => {
 
         // Detect listing type from quick scan metadata (stored by quick-scan function)
         // Fall back to universal prompt if not property, or if detection unavailable
-        let promptFile = 'fast-universal-v2.md';
+        let promptFile = 'fast-universal-v4.md';
         try {
             const qsMeta = await store.get('qs/' + sessionId, { type: 'json' });
             if (qsMeta && qsMeta.category) {
@@ -129,7 +129,7 @@ exports.handler = async (event) => {
         let systemPrompt = loadPrompt(promptFile);
         if (!systemPrompt) {
             // Fallback to universal if specialty prompt missing
-            systemPrompt = loadPrompt('fast-universal-v2.md');
+            systemPrompt = loadPrompt('fast-universal-v4.md');
         }
         if (!systemPrompt) {
             await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing' });
