@@ -1151,15 +1151,20 @@ async function generateReport(paymentId) {
         document.getElementById('genOverlay').classList.add('completing');
         await new Promise(function(r) { setTimeout(r, 520); });
 
-        // Close overlay entirely — gen-right becomes the page
+        // Physically detach genRight from the overlay and append to body
+        // so closing the overlay doesn't take the report with it
+        var genRight = document.getElementById('genRight');
+        document.body.appendChild(genRight);
+
+        // Now safe to close overlay
         document.getElementById('genOverlay').classList.remove('active', 'completing');
         document.getElementById('formContainer').style.display = 'none';
 
-        // Move gen-right out of the overlay into the body as a normal scrolling page
-        var genRight = document.getElementById('genRight');
-        genRight.style.cssText = 'position:fixed;inset:0;overflow-y:auto;background:#fff;z-index:10;';
+        // Pin genRight as a full-screen page
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        genRight.style.cssText = 'position:fixed;inset:0;overflow-y:auto;background:' + (isDark ? '#0f1117' : '#fff') + ';z-index:10;';
 
-        // Size liveFrame to its content
+        // Size liveFrame to content
         liveFrame.style.position = 'static';
         liveFrame.style.height = '100px';
         liveFrame.style.width = '100%';
@@ -1171,7 +1176,7 @@ async function generateReport(paymentId) {
             } catch(e) { liveFrame.style.height = '5000px'; }
         }, 100);
 
-        // Append action buttons at bottom
+        // Append action buttons
         var existing = genRight.querySelector('.report-actions-inline');
         if (!existing) {
             var actions = document.createElement('div');
@@ -1281,12 +1286,14 @@ function resetForm() {
     var skel = document.getElementById('skeletonWrap');
     if (skel) skel.classList.remove('hidden');
 
-    // Restore gen-right to its original overlay position
+    // Put genRight back inside the overlay where it belongs
     var gr = document.getElementById('genRight');
     if (gr) {
         gr.style.cssText = '';
         var existingActions = gr.querySelector('.report-actions-inline');
         if (existingActions) gr.removeChild(existingActions);
+        var overlay = document.getElementById('genOverlay');
+        if (gr.parentNode !== overlay) overlay.appendChild(gr);
     }
 
     // Restore gen-left
