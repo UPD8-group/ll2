@@ -88,43 +88,95 @@
         .privacy-strip span { display: flex; align-items: center; gap: 5px; }
 
         /* =====================================================
-           REPORT GENERATION OVERLAY — GROK STYLE TICKER
+           SPLIT-SCREEN GENERATION VIEW
+           Left: ticker / Right: report builds live
            ===================================================== */
-        .gen-overlay { display: none; position: fixed; inset: 0; background: #0A0A0A; z-index: 200; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* Full-screen split container */
+        .gen-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: #0A0A0A;
+            flex-direction: row;
+        }
         .gen-overlay.active { display: flex; }
 
-        .gen-inner { width: 100%; max-width: 520px; padding: 0 32px; }
+        /* LEFT PANEL — ticker */
+        .gen-left {
+            width: 380px;
+            min-width: 340px;
+            flex-shrink: 0;
+            background: #0A0A0A;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 48px 40px;
+            border-right: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            z-index: 10;
+        }
 
-        /* Big blurred report preview behind */
-        .gen-report-blur { position: absolute; inset: 0; overflow: hidden; opacity: 0; transition: opacity 1s ease; pointer-events: none; }
-        .gen-report-blur.visible { opacity: 1; }
-        .gen-report-blur iframe { width: 100%; height: 100%; border: none; filter: blur(24px) brightness(0.3); transform: scale(1.05); }
+        /* RIGHT PANEL — live report builds here */
+        .gen-right {
+            flex: 1;
+            overflow-y: auto;
+            background: #ffffff;
+            position: relative;
+        }
+        /* Empty state — centred icon shown before first HTML arrives */
+        .gen-right-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .gen-right-empty.hidden { opacity: 0; }
+        .gen-right-empty svg { width: 48px; height: 48px; }
+        .gen-right-empty p { font-size: 13px; color: rgba(100,116,139,0.5); font-family: var(--font-mono); letter-spacing: 0.05em; }
 
-        /* Foreground content */
-        .gen-foreground { position: relative; z-index: 10; width: 100%; max-width: 520px; }
+        /* Live iframe — report streams in here */
+        #liveFrame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: #ffffff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #liveFrame.visible { opacity: 1; }
+
+        /* Foreground content (inside left panel) */
+        .gen-foreground { width: 100%; }
 
         /* LL logo mark */
         .gen-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 48px; }
-        .gen-logo-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
-        .gen-logo-icon svg { width: 20px; height: 20px; }
-        .gen-logo-text { font-weight: 700; font-size: 17px; color: #fff; }
+        .gen-logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .gen-logo-icon svg { width: 18px; height: 18px; }
+        .gen-logo-text { font-weight: 700; font-size: 16px; color: #fff; }
 
         /* Status line */
-        .gen-status { font-family: var(--font-mono); font-size: 13px; color: #4ade80; margin-bottom: 24px; min-height: 20px; }
+        .gen-status { font-family: var(--font-mono); font-size: 12px; color: #4ade80; margin-bottom: 20px; min-height: 18px; }
         .gen-status-dot { display: inline-block; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; margin-right: 8px; animation: pulse-dot 1.2s ease infinite; }
         @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         /* Progress bar */
-        .gen-bar-wrap { width: 100%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; margin-bottom: 16px; overflow: hidden; }
+        .gen-bar-wrap { width: 100%; height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; margin-bottom: 14px; overflow: hidden; }
         .gen-bar { height: 100%; background: #4ade80; border-radius: 1px; width: 0%; transition: width 0.4s ease; }
 
         /* Percentage */
-        .gen-pct { font-family: var(--font-mono); font-size: 64px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 8px; letter-spacing: -2px; }
-        .gen-pct-label { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 40px; }
+        .gen-pct { font-family: var(--font-mono); font-size: 56px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; letter-spacing: -2px; }
+        .gen-pct-label { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 36px; }
 
         /* Steps */
-        .gen-steps { display: flex; flex-direction: column; gap: 10px; }
-        .gen-step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.3); transition: color 0.4s; }
+        .gen-steps { display: flex; flex-direction: column; gap: 9px; }
+        .gen-step { display: flex; align-items: center; gap: 11px; font-size: 13px; color: rgba(255,255,255,0.3); transition: color 0.4s; }
         .gen-step.active { color: rgba(255,255,255,0.9); }
         .gen-step.done { color: rgba(255,255,255,0.45); }
         .gen-step-icon { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; transition: all 0.4s; font-family: var(--font-mono); }
@@ -132,47 +184,31 @@
         .gen-step.done .gen-step-icon { border-color: #4ade80; background: #4ade80; color: #0A0A0A; }
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.3); } 50% { box-shadow: 0 0 0 4px rgba(74,222,128,0); } }
 
-        /* Materialize: report fades + unblurs when done */
-        .gen-overlay.materializing .gen-foreground { animation: fadeOut 0.8s ease forwards; }
-        .gen-overlay.materializing .gen-report-blur { opacity: 1 !important; }
-        .gen-overlay.materializing .gen-report-blur iframe { animation: unblur 1.2s ease forwards; }
-        @keyframes fadeOut { to { opacity: 0; transform: translateY(-8px); } }
-        @keyframes unblur { to { filter: blur(0px) brightness(1); transform: scale(1); } }
+        /* Fade out left panel when done */
+        .gen-overlay.completing .gen-left { animation: fadeOutLeft 0.6s ease forwards; }
+        @keyframes fadeOutLeft { to { opacity: 0; transform: translateX(-16px); } }
 
-        /* Corner mode: ticker shrinks to bottom-right corner while report builds */
-        .gen-overlay.corner-mode {
-            background: transparent;
-            pointer-events: none;
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding: 0 24px 24px 0;
-        }
-        .gen-overlay.corner-mode .gen-foreground {
-            background: rgba(10,10,10,0.92);
-            backdrop-filter: blur(12px);
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 20px 24px;
-            width: 280px;
-            max-width: 280px;
-            animation: shrinkToCorner 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
-        }
-        .gen-overlay.corner-mode .gen-logo { display: none; }
-        .gen-overlay.corner-mode .gen-steps { display: none; }
-        .gen-overlay.corner-mode .gen-pct { font-size: 36px; margin-bottom: 4px; }
-        .gen-overlay.corner-mode .gen-pct-label { font-size: 12px; margin-bottom: 12px; }
-        .gen-overlay.corner-mode .gen-report-blur { display: none; }
-        @keyframes shrinkToCorner {
-            from { transform: scale(1); opacity: 1; }
-            to   { transform: scale(1); opacity: 1; }
+        /* Mobile: stack vertically */
+        @media (max-width: 640px) {
+            .gen-overlay { flex-direction: column; }
+            .gen-overlay { flex-direction: column; }
+            .gen-left { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 28px 24px; flex-shrink: 0; max-height: 50vh; overflow-y: auto; }
+            .gen-right { flex: 1; min-height: 200px; }
+            .gen-steps { display: none; }
+            .gen-pct { font-size: 40px; }
+            .gen-logo { margin-bottom: 24px; }
+            .gen-pct-label { margin-bottom: 20px; }
         }
 
-        /* REPORT */
-        .report-container { display: none; background: #ffffff; }
-        .report-container.active { display: block; background: #ffffff; }
-        .report-iframe-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: #fff; }
-        #reportFrame { width: 100%; border: none; min-height: 600px; display: block; background: #fff; }
-        .report-actions { display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        /* Unused blur layer kept for compat */
+        .gen-report-blur { display: none; }
+
+        /* REPORT (final view after gen completes) */
+        .report-container { display: none; background: #f8fafc; min-height: 100vh; }
+        .report-container.active { display: block; }
+        .report-iframe-wrap { background: #f8fafc; }
+        #reportFrame { width: 100%; border: none; min-height: 600px; display: block; background: #f8fafc; }
+        .report-actions { display: flex; justify-content: center; gap: 12px; padding: 20px 0 48px; flex-wrap: wrap; }
         .action-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--bg-white); border: 2px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.15s; text-decoration: none; }
         .action-btn:hover { border-color: var(--accent); color: var(--accent); }
         .action-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -265,13 +301,9 @@
 
 <!-- GENERATION OVERLAY — GROK STYLE -->
 <div class="gen-overlay" id="genOverlay">
-    <!-- Blurred report preview (populated when report arrives) -->
-    <div class="gen-report-blur" id="genBlur">
-        <iframe id="blurFrame" sandbox="allow-same-origin" scrolling="no"></iframe>
-    </div>
 
-    <!-- Foreground ticker -->
-    <div class="gen-foreground" id="genForeground">
+    <!-- LEFT: Ticker panel -->
+    <div class="gen-left">
         <div class="gen-logo">
             <div class="gen-logo-icon"><svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" stroke-linecap="round"/></svg></div>
             <span class="gen-logo-text">Listing Lens</span>
@@ -296,6 +328,21 @@
             <div class="gen-step" id="gs7"><div class="gen-step-icon">7</div> Generating report</div>
         </div>
     </div>
+
+    <!-- RIGHT: Live report panel -->
+    <div class="gen-right" id="genRight">
+        <!-- Empty state while waiting for first chunks -->
+        <div class="gen-right-empty" id="genRightEmpty">
+            <svg fill="none" viewBox="0 0 48 48" stroke="rgba(100,116,139,0.4)" stroke-width="1.5">
+                <circle cx="21" cy="21" r="13"/>
+                <path d="m32 32 8 8" stroke-linecap="round"/>
+            </svg>
+            <span>Report building...</span>
+        </div>
+        <!-- Live iframe — report streams in here -->
+        <iframe id="liveFrame" sandbox="allow-same-origin" scrolling="yes"></iframe>
+    </div>
+
 </div>
 
 <!-- REPORT -->
@@ -664,52 +711,120 @@ async function generateReport(paymentId) {
             sid = upData.sessionId;
         }
 
-        // Validate session → get jobId
-        var validateRes = await fetch('/api/generate-report', {
+        // Call streaming endpoint — waits for Claude to finish, returns all chunks
+        var streamRes = await fetch('/api/stream-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid })
+            body: JSON.stringify({ sessionId: sid, paymentIntentId: paymentId })
         });
-        if (!validateRes.ok) {
-            var errData = await validateRes.json().catch(function() { return {}; });
-            if (validateRes.status === 410) throw new Error('EXPIRED:' + (errData.message || 'Session expired.'));
-            throw new Error(errData.error || 'HTTP ' + validateRes.status);
+
+        if (streamRes.status === 410) {
+            var errData = await streamRes.json().catch(function() { return {}; });
+            throw new Error('EXPIRED:' + (errData.message || 'Session expired.'));
         }
-        var validateData = await validateRes.json();
-        var jobId = validateData.jobId;
-
-        // Fire background function (browser → Netlify directly)
-        var bgRes = await fetch('/.netlify/functions/generate-report-background', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ jobId: jobId, sessionId: sid, paymentIntentId: paymentId })
-        });
-        if (!bgRes.ok && bgRes.status !== 202) throw new Error('Could not start report (HTTP ' + bgRes.status + ')');
-
-        // Poll until done
-        var report = await pollForReport(jobId);
-
-        // Step 1: Load report into blur frame FIRST and give it time to paint
-        if (report.html) {
-            var blurFrame = document.getElementById('blurFrame');
-            blurFrame.srcdoc = report.html;
-            // Wait for iframe to paint before starting the visual transition
-            await new Promise(function(r) { setTimeout(r, 600); });
-            document.getElementById('genBlur').classList.add('visible');
-            // Brief pause so the blurred report is visible before ticker completes
-            await new Promise(function(r) { setTimeout(r, 300); });
+        if (!streamRes.ok) {
+            var errData = await streamRes.json().catch(function() { return {}; });
+            throw new Error(errData.error || 'HTTP ' + streamRes.status);
         }
 
-        // Step 2: Snap ticker to 100%
+        // Parse SSE body — all chunks returned at once, we animate the assembly
+        var responseText = await streamRes.text();
+        var lines = responseText.split('\n');
+        var chunks = [];
+        var reportId = 'LL-REPORT';
+
+        lines.forEach(function(line) {
+            if (!line.startsWith('data: ')) return;
+            try {
+                var ev = JSON.parse(line.slice(6));
+                if (ev.type === 'chunk') chunks.push(ev.text);
+                if (ev.type === 'done') reportId = ev.reportId || reportId;
+                if (ev.type === 'error') throw new Error(ev.message);
+            } catch(e) {
+                if (e.message && !e.message.includes('JSON')) throw e;
+            }
+        });
+
+        if (chunks.length === 0) throw new Error('No report content received');
+
+        // Store full HTML for download
+        var fullHtml = chunks.join('');
+        currentReportHtml = fullHtml;
+        currentReportId   = reportId;
+
+        // Animate assembly into RIGHT PANEL live iframe
+        var segments = [];
+        var segSize = 80;
+        for (var i = 0; i < fullHtml.length; i += segSize) {
+            segments.push(fullHtml.substring(i, i + segSize));
+        }
+
+        var liveFrame  = document.getElementById('liveFrame');
+        var emptyState = document.getElementById('genRightEmpty');
+        var assembled  = '';
+        var segIdx     = 0;
+        var frameVisible = false;
+
+        await new Promise(function(resolve) {
+            function writeNext() {
+                if (segIdx >= segments.length) { resolve(); return; }
+
+                assembled += segments[segIdx];
+                segIdx++;
+
+                // Update live iframe every 6 segments
+                if (segIdx % 6 === 0 || segIdx === segments.length) {
+                    // Once body is open, show the frame
+                    if (!frameVisible && assembled.indexOf('<body') !== -1) {
+                        frameVisible = true;
+                        emptyState.classList.add('hidden');
+                        liveFrame.srcdoc = assembled + '</body></html>';
+                        setTimeout(function() { liveFrame.classList.add('visible'); }, 60);
+                    } else if (frameVisible) {
+                        liveFrame.srcdoc = assembled + '</body></html>';
+                    }
+                }
+
+                // Drive pct from 88 → 99 as segments write
+                var segPct = 88 + Math.floor((segIdx / segments.length) * 11);
+                if (segPct > currentPct) {
+                    currentPct = segPct;
+                    document.getElementById('genPct').textContent = Math.floor(currentPct) + '%';
+                    document.getElementById('genBar').style.width = Math.floor(currentPct) + '%';
+                }
+
+                // Fast at start (CSS), steady through content
+                var delay = segIdx < segments.length * 0.25 ? 3 : 10;
+                setTimeout(writeNext, delay);
+            }
+            writeNext();
+        });
+
+        // Set final complete HTML
+        liveFrame.srcdoc = fullHtml;
+
+        // Snap ticker to 100%
         await completeTicker();
 
-        // Step 3: Trigger materialise animation (blur sharpens, foreground fades)
-        document.getElementById('genOverlay').classList.add('materializing');
+        // Close overlay — transition to main report view
+        document.getElementById('genOverlay').classList.remove('active');
+        document.body.classList.add('report-active');
 
-        // Step 4: Wait for animation then switch cleanly to report view
-        await new Promise(function(r) { setTimeout(r, 1500); });
-        document.getElementById('genOverlay').classList.remove('active', 'materializing');
-        renderReport(report);
+        var mainFrame = document.getElementById('reportFrame');
+        var container = document.getElementById('reportContainer');
+        mainFrame.srcdoc = fullHtml;
+        container.classList.add('active');
+
+        // Size main iframe
+        setTimeout(function() {
+            try {
+                var doc = mainFrame.contentDocument;
+                var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+                if (h > 100) mainFrame.style.height = (h + 32) + 'px';
+            } catch(e) { mainFrame.style.height = '5000px'; }
+        }, 800);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (err) {
         stopTicker();
@@ -725,7 +840,7 @@ async function generateReport(paymentId) {
     }
 }
 
-// Poll every 3s, timeout after 3 min
+// Legacy poll function kept for reference but no longer called
 async function pollForReport(jobId) {
     var maxAttempts = 60;
     for (var i = 0; i < maxAttempts; i++) {
@@ -803,8 +918,11 @@ function resetForm() {
     document.body.classList.remove('report-active');
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
-    document.getElementById('blurFrame').srcdoc = '';
-    document.getElementById('genBlur').classList.remove('visible');
+    // Reset live frame and empty state
+    var lf = document.getElementById('liveFrame');
+    if (lf) { lf.srcdoc = ''; lf.classList.remove('visible'); }
+    var es = document.getElementById('genRightEmpty');
+    if (es) es.classList.remove('hidden');
     document.getElementById('formContainer').style.display = '';
     document.querySelectorAll('input[name="price"]').forEach(function(r) { r.checked = r.value === '200'; });
     window.scrollTo({ top: 0, behavior: 'smooth' });
