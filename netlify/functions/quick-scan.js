@@ -108,9 +108,12 @@ exports.handler = async (event) => {
             return { statusCode: 200, headers, body: JSON.stringify({ title: 'Reading listing...' }) };
         }
 
-        // Cache the detected category so stream-report-background can route to the right prompt
+        // Cache category + tier so stream-report-background can route to the right prompt
+        // tier comes from the dashboard after payment is set up ($5/$10 = deep-dive, $2 = standard)
         try {
-            await store.setJSON('qs/' + sessionId, { category: parsed.category || '' });
+            const body = JSON.parse(event.body || '{}');
+            const tier = body.tier || 'standard';
+            await store.setJSON('qs/' + sessionId, { category: parsed.category || '', tier });
         } catch (e) {}
 
         return { statusCode: 200, headers, body: JSON.stringify(parsed) };
