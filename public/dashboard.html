@@ -19,11 +19,21 @@
             --font: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-display: 'DM Serif Display', Georgia, serif;
             --font-mono: 'JetBrains Mono', monospace;
+            --nav-bg: rgba(250,250,249,0.92);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="dark"] {
+            --bg: #0f1117; --bg-white: #1a1d27; --text: #e8eaf0; --text-sec: #9ca3af; --text-muted: #6b7280;
+            --border: #2d3148; --border-light: #252840;
+            --accent: #22c55e; --accent-hover: #16a34a; --accent-bg: #052e16;
+            --red: #f87171; --red-bg: #1f0a0a;
+            --nav-bg: rgba(15,17,23,0.95);
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-        nav { background: rgba(250,250,249,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 50; }
+        nav { background: var(--nav-bg); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 0; z-index: 50; transition: background 0.2s; }
         .nav-inner { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 60px; }
         .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
         .logo-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
@@ -197,6 +207,43 @@
         .skel-cost-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9; }
         .skel-cost-row.total { border-top: 2px solid #e2e8f0; border-bottom: none; padding-top: 10px; }
 
+        /* Skeleton field styles */
+        .skel-eyebrow { display: flex; gap: 8px; margin-bottom: 12px; }
+        .skel-tag { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+            background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);
+            padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; }
+        .skel-tag--muted { background: rgba(255,255,255,0.05); }
+        .skel-title { min-height: 56px; }
+        .skel-price { min-height: 28px; }
+        .skel-location { min-height: 18px; }
+        .skel-section-label { font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+            letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 14px; }
+        .skel-field { }
+        .skel-field-label { font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+            letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 5px; }
+        .skel-field-value { font-size: 15px; font-weight: 600; color: #0f172a; min-height: 22px; }
+        .skel-scanning { }
+
+        /* Filled field text pops in */
+        .skel-filled { animation: popIn 0.3s ease; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        /* Hero filled state */
+        .skel-hero.filled .skel-tag { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .skel-hero-title-text { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.25; }
+        .skel-hero-price-text { font-size: 28px; font-weight: 800; color: #4ade80; margin-top: 10px; display: block; }
+        .skel-hero-loc-text { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 6px; }
+        .skel-note { font-size: 13px; color: #64748b; line-height: 1.6; padding: 2px 0; }
+        .skel-note + .skel-note { margin-top: 5px; }
+        .skel-absent { display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+            background: #fffbeb; border-left: 3px solid #d97706; border-radius: 0 6px 6px 0;
+            font-size: 13px; color: #92400e; margin-bottom: 6px; }
+        .skel-cost-filled { display: flex; justify-content: space-between; padding: 7px 0;
+            border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .skel-cost-filled .amt { font-weight: 700; color: #0f172a; }
+        .skel-q { font-size: 13px; color: #334155; padding: 6px 0 6px 12px;
+            border-left: 2px solid #10b981; margin-bottom: 6px; }
+
         /* Live iframe — overlays skeleton, fades in when report arrives */
         #liveFrame {
             position: absolute;
@@ -288,6 +335,52 @@
         .action-btn.primary:hover { background: var(--accent-hover); }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 36px; height: 36px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-white);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .theme-toggle:hover { border-color: var(--accent); background: var(--accent-bg); }
+        .theme-toggle svg { width: 16px; height: 16px; color: var(--text-muted); transition: color 0.15s; }
+        .theme-toggle:hover svg { color: var(--accent); }
+        .icon-sun, .icon-moon { position: absolute; transition: opacity 0.2s, transform 0.3s; }
+        .icon-sun  { opacity: 1; transform: rotate(0deg); }
+        .icon-moon { opacity: 0; transform: rotate(90deg); }
+        [data-theme="dark"] .icon-sun  { opacity: 0; transform: rotate(-90deg); }
+        [data-theme="dark"] .icon-moon { opacity: 1; transform: rotate(0deg); }
+        .theme-toggle { position: relative; }
+
+        /* Dark mode: body & upload zone */
+        [data-theme="dark"] body { background: var(--bg); color: var(--text); }
+        [data-theme="dark"] .upload-zone { background: var(--bg-white); border-color: var(--border); }
+        [data-theme="dark"] .upload-zone:hover { border-color: var(--accent); background: var(--accent-bg); }
+        [data-theme="dark"] .file-item { background: var(--bg-white); border-color: var(--border); }
+        [data-theme="dark"] .payment-box { background: var(--bg-white); border-color: var(--border); }
+        [data-theme="dark"] .price-opt-inner { background: var(--bg); border-color: var(--border); }
+        [data-theme="dark"] .price-opt input:checked + .price-opt-inner { background: var(--accent-bg); border-color: var(--accent); }
+        [data-theme="dark"] .price-opt-amount { color: var(--text); }
+        [data-theme="dark"] .beta-banner { background: var(--accent-bg); border-color: rgba(34,197,94,0.2); }
+        [data-theme="dark"] .beta-banner p { color: #86efac; }
+        [data-theme="dark"] .action-btn { background: var(--bg-white); border-color: var(--border); color: var(--text); }
+        [data-theme="dark"] .action-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        [data-theme="dark"] .skeleton-wrap { background: var(--bg-white); }
+        [data-theme="dark"] .skel-card { background: var(--bg-white); border-color: var(--border); }
+        [data-theme="dark"] .skel-bar { background: linear-gradient(90deg, #2d3148 25%, #353859 50%, #2d3148 75%); background-size: 600px 100%; }
+        [data-theme="dark"] .skel-flag { background: linear-gradient(90deg, #1e2235 25%, #252840 50%, #1e2235 75%); background-size: 600px 100%; border-color: #2d3148; }
+        [data-theme="dark"] .skel-cost-row { border-color: #2d3148; }
+        [data-theme="dark"] .skel-section-label { color: #6b7280; }
+        [data-theme="dark"] .skel-field-label { color: #6b7280; }
+        [data-theme="dark"] .skel-field-value { color: var(--text); }
+        [data-theme="dark"] .skel-note { color: #9ca3af; }
+        [data-theme="dark"] .skel-q { color: #9ca3af; border-color: var(--accent); }
+        [data-theme="dark"] .report-actions-inline { background: var(--bg-white); }
     </style>
 </head>
 <body>
@@ -298,7 +391,18 @@
             <div class="logo-icon"><svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" stroke-linecap="round"/></svg></div>
             <span class="logo-text">Listing Lens</span>
         </a>
-        <a href="/" class="nav-link">← Back to home</a>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <a href="/" class="nav-link">← Back to home</a>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+                <svg class="icon-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-linecap="round"/>
+                </svg>
+                <svg class="icon-moon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
     </div>
 </nav>
 
@@ -404,60 +508,84 @@
 
     <!-- RIGHT: Live report panel -->
     <div class="gen-right" id="genRight">
-        <!-- Skeleton placeholder — visible while polling -->
+        <!-- Skeleton — fields fill in as ticker progresses -->
         <div class="skeleton-wrap" id="skeletonWrap">
-            <div class="skel-hero">
-                <div class="skel-bar skel-bar--sm w40"></div>
-                <div class="skel-bar skel-bar--lg w70 mt8"></div>
-                <div class="skel-bar skel-bar--lg w55 mt4"></div>
-                <div class="skel-bar skel-bar--sm w30 mt12"></div>
+
+            <!-- HERO — fills at step 1 (reading screenshots) -->
+            <div class="skel-hero" id="skelHero">
+                <div class="skel-eyebrow">
+                    <span class="skel-tag" id="skelCategory"><span class="skel-bar skel-bar--xs w30"></span></span>
+                    <span class="skel-tag skel-tag--muted" id="skelPlatform"><span class="skel-bar skel-bar--xs w20"></span></span>
+                </div>
+                <div class="skel-title" id="skelTitle"><span class="skel-bar skel-bar--lg w70 mt8"></span><span class="skel-bar skel-bar--lg w45 mt4"></span></div>
+                <div class="skel-price" id="skelPrice"><span class="skel-bar skel-bar--md w25 mt12"></span></div>
+                <div class="skel-location" id="skelLocation"><span class="skel-bar skel-bar--xs w35 mt6"></span></div>
             </div>
-            <div class="skel-card">
-                <div class="skel-bar skel-bar--xs w20 mb10"></div>
-                <div class="skel-grid">
-                    <div>
-                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
-                        <div class="skel-bar skel-bar--md w60"></div>
+
+            <!-- WHAT IT IS — fills at step 2 (identifying) -->
+            <div class="skel-card" id="skelCard1">
+                <div class="skel-section-label">01 — WHAT THIS LISTING IS</div>
+                <div class="skel-grid" id="skelGrid1">
+                    <div class="skel-field">
+                        <div class="skel-field-label">CATEGORY</div>
+                        <div class="skel-field-value" id="sfCategory"><span class="skel-bar skel-bar--sm w60"></span></div>
                     </div>
-                    <div>
-                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
-                        <div class="skel-bar skel-bar--md w50"></div>
+                    <div class="skel-field">
+                        <div class="skel-field-label">LISTED BY</div>
+                        <div class="skel-field-value" id="sfSeller"><span class="skel-bar skel-bar--sm w50"></span></div>
                     </div>
-                    <div>
-                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
-                        <div class="skel-bar skel-bar--md w45"></div>
+                    <div class="skel-field">
+                        <div class="skel-field-label">LOCATION</div>
+                        <div class="skel-field-value" id="sfLocation"><span class="skel-bar skel-bar--sm w55"></span></div>
                     </div>
-                    <div>
-                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
-                        <div class="skel-bar skel-bar--md w55"></div>
+                    <div class="skel-field">
+                        <div class="skel-field-label">LISTING PRICE</div>
+                        <div class="skel-field-value" id="sfPrice"><span class="skel-bar skel-bar--sm w40"></span></div>
                     </div>
                 </div>
             </div>
-            <div class="skel-card">
-                <div class="skel-bar skel-bar--xs w25 mb10"></div>
-                <div class="skel-bar skel-bar--sm w100 mb6"></div>
-                <div class="skel-bar skel-bar--sm w90 mb6"></div>
-                <div class="skel-bar skel-bar--sm w75"></div>
+
+            <!-- MARKET CONTEXT — fills at step 3 -->
+            <div class="skel-card" id="skelCard3">
+                <div class="skel-section-label">03 — WHAT THE DATA SHOWS</div>
+                <div class="skel-scanning" id="sfMarket">
+                    <div class="skel-bar skel-bar--sm w100 mb6"></div>
+                    <div class="skel-bar skel-bar--sm w85 mb6"></div>
+                    <div class="skel-bar skel-bar--sm w70"></div>
+                </div>
             </div>
-            <div class="skel-card">
-                <div class="skel-bar skel-bar--xs w20 mb10"></div>
-                <div class="skel-flag"></div>
-                <div class="skel-flag mt6"></div>
-                <div class="skel-flag mt6"></div>
+
+            <!-- WHAT'S MISSING — fills at step 4 -->
+            <div class="skel-card" id="skelCard4">
+                <div class="skel-section-label">05 — WHAT'S NOT IN THE LISTING</div>
+                <div id="sfMissing">
+                    <div class="skel-flag"></div>
+                    <div class="skel-flag mt6"></div>
+                    <div class="skel-flag mt6"></div>
+                </div>
             </div>
-            <div class="skel-card">
-                <div class="skel-bar skel-bar--xs w30 mb10"></div>
-                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w40"></div><div class="skel-bar skel-bar--sm w20"></div></div>
-                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w35"></div><div class="skel-bar skel-bar--sm w20"></div></div>
-                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w45"></div><div class="skel-bar skel-bar--sm w20"></div></div>
-                <div class="skel-cost-row total"><div class="skel-bar skel-bar--md w30"></div><div class="skel-bar skel-bar--md w25"></div></div>
+
+            <!-- COSTS — fills at step 5 -->
+            <div class="skel-card" id="skelCard5">
+                <div class="skel-section-label">07 — WHAT IT COSTS TO OWN</div>
+                <div id="sfCosts">
+                    <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w40"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                    <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w35"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                    <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w45"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                    <div class="skel-cost-row total"><div class="skel-bar skel-bar--md w30"></div><div class="skel-bar skel-bar--md w25"></div></div>
+                </div>
             </div>
-            <div class="skel-card">
-                <div class="skel-bar skel-bar--xs w25 mb10"></div>
-                <div class="skel-bar skel-bar--sm w100 mb6"></div>
-                <div class="skel-bar skel-bar--sm w85 mb6"></div>
-                <div class="skel-bar skel-bar--sm w70"></div>
+
+            <!-- QUESTIONS — fills at step 6 -->
+            <div class="skel-card" id="skelCard6">
+                <div class="skel-section-label">11 — QUESTIONS TO ASK</div>
+                <div id="sfQuestions">
+                    <div class="skel-bar skel-bar--sm w100 mb6"></div>
+                    <div class="skel-bar skel-bar--sm w90 mb6"></div>
+                    <div class="skel-bar skel-bar--sm w80"></div>
+                </div>
             </div>
+
         </div>
         <!-- Live iframe — fades in over skeleton when report arrives -->
         <iframe id="liveFrame" sandbox="allow-same-origin" scrolling="yes"></iframe>
@@ -813,6 +941,106 @@ function completeTicker() {
     });
 }
 
+// ─── QUICK SCAN — fills skeleton as ticker runs ──────────────────────────────
+// Fires immediately after upload. Calls Claude for fast JSON extract only.
+// Result populates skeleton fields timed to ticker steps.
+
+var quickScanData = null; // populated by runQuickScan()
+
+async function runQuickScan(sessionId) {
+    try {
+        var res = await fetch('/api/quick-scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sessionId })
+        });
+        if (!res.ok) return;
+        quickScanData = await res.json();
+        scheduleSkeletonFills();
+    } catch(e) {
+        console.warn('Quick scan failed (non-fatal):', e.message);
+    }
+}
+
+function scheduleSkeletonFills() {
+    if (!quickScanData) return;
+    var d = quickScanData;
+
+    // Step 1 (ms 0): Fill hero — title, price, location
+    setTimeout(function() { fillHero(d); }, 800);
+
+    // Step 2 (ms 3000): Fill identification fields
+    setTimeout(function() { fillIdentification(d); }, 3800);
+
+    // Step 3 (ms 7000): Fill market context note
+    setTimeout(function() { fillMarket(d); }, 7800);
+
+    // Step 4 (ms 13000): Fill what's absent
+    setTimeout(function() { fillAbsent(d); }, 13800);
+
+    // Step 5 (ms 20000): Fill cost estimates
+    setTimeout(function() { fillCosts(d); }, 20800);
+
+    // Step 6 (ms 28000): Fill questions
+    setTimeout(function() { fillQuestions(d); }, 28800);
+}
+
+function skelSet(id, html) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('skel-filled');
+    el.innerHTML = html;
+}
+
+function fillHero(d) {
+    if (d.title) skelSet('skelTitle', '<span class="skel-hero-title-text">' + esc(d.title) + '</span>');
+    if (d.price) skelSet('skelPrice', '<span class="skel-hero-price-text">' + esc(d.price) + '</span>');
+    if (d.location) skelSet('skelLocation', '<span class="skel-hero-loc-text">📍 ' + esc(d.location) + '</span>');
+    if (d.category) skelSet('skelCategory', esc(d.category));
+    if (d.platform) skelSet('skelPlatform', esc(d.platform));
+    document.getElementById('skelHero').classList.add('filled');
+}
+
+function fillIdentification(d) {
+    if (d.category) skelSet('sfCategory', esc(d.category));
+    if (d.seller_type) skelSet('sfSeller', esc(d.seller_type));
+    if (d.location) skelSet('sfLocation', esc(d.location));
+    if (d.price) skelSet('sfPrice', esc(d.price));
+}
+
+function fillMarket(d) {
+    if (d.market_note) {
+        skelSet('sfMarket', '<p class="skel-note">' + esc(d.market_note) + '</p>');
+    }
+}
+
+function fillAbsent(d) {
+    if (d.absent && d.absent.length) {
+        var html = d.absent.slice(0,3).map(function(a) {
+            return '<div class="skel-absent">◎ ' + esc(a) + '</div>';
+        }).join('');
+        skelSet('sfMissing', html);
+    }
+}
+
+function fillCosts(d) {
+    if (d.costs && d.costs.length) {
+        var rows = d.costs.map(function(c) {
+            return '<div class="skel-cost-filled"><span>' + esc(c.label) + '</span><span class="amt">' + esc(c.amount) + '</span></div>';
+        }).join('');
+        skelSet('sfCosts', rows);
+    }
+}
+
+function fillQuestions(d) {
+    if (d.questions && d.questions.length) {
+        var html = d.questions.slice(0,3).map(function(q) {
+            return '<div class="skel-q">' + esc(q) + '</div>';
+        }).join('');
+        skelSet('sfQuestions', html);
+    }
+}
+
 // ─── GENERATE REPORT ─────────────────────────────────────────────────────────
 // Architecture:
 //   1. Validate session → get jobId  (/api/generate-report)
@@ -850,6 +1078,9 @@ async function generateReport(paymentId) {
         }
         var validateData = await validateRes.json();
         var jobId = validateData.jobId;
+
+        // Fire quick scan in parallel (non-blocking) to fill skeleton
+        runQuickScan(sid);
 
         // Step 2: Fire background function — returns 202, runs async
         fetch('/.netlify/functions/stream-report-background', {
@@ -916,44 +1147,40 @@ async function generateReport(paymentId) {
         liveFrame.srcdoc = fullHtml;
         await completeTicker();
 
-        // Expand live iframe to fill full screen — no page jump
-        // Fade left panel out, let right panel take over
+        // Fade left panel out
         document.getElementById('genOverlay').classList.add('completing');
+        await new Promise(function(r) { setTimeout(r, 520); });
 
-        await new Promise(function(r) { setTimeout(r, 500); });
+        // Close overlay entirely — gen-right becomes the page
+        document.getElementById('genOverlay').classList.remove('active', 'completing');
+        document.getElementById('formContainer').style.display = 'none';
 
-        // Switch: hide gen-left, expand gen-right to full width
-        var genLeft  = document.querySelector('.gen-left');
+        // Move gen-right out of the overlay into the body as a normal scrolling page
         var genRight = document.getElementById('genRight');
-        genLeft.style.display = 'none';
-        genRight.style.position = 'fixed';
-        genRight.style.inset = '0';
-        genRight.style.zIndex = '201';
-        genRight.style.overflowY = 'auto';
+        genRight.style.cssText = 'position:fixed;inset:0;overflow-y:auto;background:#fff;z-index:10;';
 
-        // Give liveFrame height so it scrolls properly
+        // Size liveFrame to its content
         liveFrame.style.position = 'static';
-        liveFrame.style.height = '5000px';
+        liveFrame.style.height = '100px';
         liveFrame.style.width = '100%';
-
-        // Wait for iframe to settle then size to content
         setTimeout(function() {
             try {
                 var doc = liveFrame.contentDocument;
                 var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-                if (h > 200) liveFrame.style.height = (h + 48) + 'px';
-            } catch(e) {}
-        }, 400);
+                liveFrame.style.height = (h > 200 ? h + 48 : 5000) + 'px';
+            } catch(e) { liveFrame.style.height = '5000px'; }
+        }, 100);
 
-        // Add download/new scan buttons inside right panel
-        var actions = document.createElement('div');
-        actions.className = 'report-actions-inline';
-        actions.innerHTML = '<button class="action-btn primary" onclick="downloadReport()">↓ Download Report</button>' +
-                            '<button class="action-btn" onclick="resetForm()">← New Scan</button>';
-        genRight.appendChild(actions);
-
+        // Append action buttons at bottom
+        var existing = genRight.querySelector('.report-actions-inline');
+        if (!existing) {
+            var actions = document.createElement('div');
+            actions.className = 'report-actions-inline';
+            actions.innerHTML = '<button class="action-btn primary" onclick="downloadReport()">↓ Download Report</button>' +
+                                '<button class="action-btn" onclick="resetForm()">← New Scan</button>';
+            genRight.appendChild(actions);
+        }
         genRight.scrollTop = 0;
-        document.getElementById('genOverlay').style.background = 'transparent';
 
     } catch (err) {
         stopTicker();
@@ -1046,32 +1273,36 @@ function resetForm() {
     document.body.classList.remove('report-active');
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
-    // Reset live frame, skeleton, and gen-right expanded state
+    // Reset live frame
     var lf = document.getElementById('liveFrame');
-    if (lf) {
-        lf.srcdoc = '';
-        lf.classList.remove('visible');
-        lf.style.position = '';
-        lf.style.height = '';
-        lf.style.width = '';
-    }
+    if (lf) { lf.srcdoc = ''; lf.classList.remove('visible'); lf.style.cssText = ''; }
+
+    // Reset skeleton
     var skel = document.getElementById('skeletonWrap');
     if (skel) skel.classList.remove('hidden');
-    // Restore gen-left and gen-right to normal overlay state
-    var gl = document.querySelector('.gen-left');
-    if (gl) gl.style.display = '';
+
+    // Restore gen-right to its original overlay position
     var gr = document.getElementById('genRight');
     if (gr) {
-        gr.style.position = '';
-        gr.style.inset = '';
-        gr.style.zIndex = '';
-        gr.style.overflowY = '';
-        // Remove appended action buttons if any
+        gr.style.cssText = '';
         var existingActions = gr.querySelector('.report-actions-inline');
         if (existingActions) gr.removeChild(existingActions);
     }
-    document.getElementById('genOverlay').style.background = '';
-    document.getElementById('genOverlay').classList.remove('completing');
+
+    // Restore gen-left
+    var gl = document.querySelector('.gen-left');
+    if (gl) gl.style.cssText = '';
+
+    // Reset overlay
+    var overlay = document.getElementById('genOverlay');
+    overlay.style.cssText = '';
+    overlay.classList.remove('active', 'completing');
+
+    // Reset quick scan state
+    quickScanData = null;
+
+    // Show form
+    document.getElementById('formContainer').style.display = '';
     document.getElementById('formContainer').style.display = '';
     document.querySelectorAll('input[name="price"]').forEach(function(r) { r.checked = r.value === '200'; });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1081,6 +1312,22 @@ function esc(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// ─── THEME TOGGLE ─────────────────────────────────────────────────────────────
+function toggleTheme() {
+    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var next = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('ll-theme', next); } catch(e) {}
+}
+
+// Apply saved theme on load
+(function() {
+    try {
+        var saved = localStorage.getItem('ll-theme');
+        if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    } catch(e) {}
+})();
 </script>
 </body>
 </html>
