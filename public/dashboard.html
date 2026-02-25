@@ -138,7 +138,66 @@
         .gen-right-empty svg { width: 48px; height: 48px; }
         .gen-right-empty p { font-size: 13px; color: rgba(100,116,139,0.5); font-family: var(--font-mono); letter-spacing: 0.05em; }
 
-        /* Live iframe — Grok-style blur reveal */
+        /* Skeleton shimmer */
+        @keyframes shimmer {
+            0% { background-position: -600px 0; }
+            100% { background-position: 600px 0; }
+        }
+        .skeleton-wrap {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 28px 32px;
+            background: #ffffff;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+        .skeleton-wrap.hidden { opacity: 0; pointer-events: none; }
+        .skel-hero {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 12px;
+        }
+        .skel-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+        .skel-bar {
+            border-radius: 4px;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.6s infinite linear;
+        }
+        /* In hero — lighter shimmer on dark */
+        .skel-hero .skel-bar {
+            background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.08) 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.6s infinite linear;
+        }
+        .skel-bar--xs  { height: 10px; }
+        .skel-bar--sm  { height: 14px; }
+        .skel-bar--md  { height: 18px; }
+        .skel-bar--lg  { height: 26px; }
+        .w20 { width: 20%; } .w25 { width: 25%; } .w30 { width: 30%; }
+        .w35 { width: 35%; } .w40 { width: 40%; } .w45 { width: 45%; }
+        .w50 { width: 50%; } .w55 { width: 55%; } .w60 { width: 60%; }
+        .w70 { width: 70%; } .w75 { width: 75%; } .w85 { width: 85%; }
+        .w90 { width: 90%; } .w100 { width: 100%; }
+        .mt4 { margin-top: 4px; } .mt6 { margin-top: 6px; }
+        .mt8 { margin-top: 8px; } .mt12 { margin-top: 12px; }
+        .mb6 { margin-bottom: 6px; } .mb10 { margin-bottom: 10px; }
+        .skel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .skel-flag { height: 44px; border-radius: 6px; border-left: 3px solid #e2e8f0;
+            background: linear-gradient(90deg, #f8fafc 25%, #f1f5f9 50%, #f8fafc 75%);
+            background-size: 600px 100%; animation: shimmer 1.6s infinite linear; }
+        .skel-cost-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f1f5f9; }
+        .skel-cost-row.total { border-top: 2px solid #e2e8f0; border-bottom: none; padding-top: 10px; }
+
+        /* Live iframe — overlays skeleton, fades in when report arrives */
         #liveFrame {
             position: absolute;
             inset: 0;
@@ -148,18 +207,12 @@
             display: block;
             background: #ffffff;
             opacity: 0;
-            filter: blur(8px);
-            transform: scale(1.02);
-            transition: opacity 0.6s ease, filter 1.8s ease, transform 1.8s ease;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
         }
         #liveFrame.visible {
             opacity: 1;
-            filter: blur(8px);
-            transform: scale(1.02);
-        }
-        #liveFrame.sharpening {
-            filter: blur(0px);
-            transform: scale(1);
+            pointer-events: auto;
         }
 
         /* Foreground content (inside left panel) */
@@ -341,15 +394,62 @@
 
     <!-- RIGHT: Live report panel -->
     <div class="gen-right" id="genRight">
-        <!-- Empty state while waiting for first chunks -->
-        <div class="gen-right-empty" id="genRightEmpty">
-            <svg fill="none" viewBox="0 0 48 48" stroke="rgba(100,116,139,0.4)" stroke-width="1.5">
-                <circle cx="21" cy="21" r="13"/>
-                <path d="m32 32 8 8" stroke-linecap="round"/>
-            </svg>
-            <span>Report building...</span>
+        <!-- Skeleton placeholder — visible while polling -->
+        <div class="skeleton-wrap" id="skeletonWrap">
+            <div class="skel-hero">
+                <div class="skel-bar skel-bar--sm w40"></div>
+                <div class="skel-bar skel-bar--lg w70 mt8"></div>
+                <div class="skel-bar skel-bar--lg w55 mt4"></div>
+                <div class="skel-bar skel-bar--sm w30 mt12"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-bar skel-bar--xs w20 mb10"></div>
+                <div class="skel-grid">
+                    <div>
+                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
+                        <div class="skel-bar skel-bar--md w60"></div>
+                    </div>
+                    <div>
+                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
+                        <div class="skel-bar skel-bar--md w50"></div>
+                    </div>
+                    <div>
+                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
+                        <div class="skel-bar skel-bar--md w45"></div>
+                    </div>
+                    <div>
+                        <div class="skel-bar skel-bar--xs w40 mb6"></div>
+                        <div class="skel-bar skel-bar--md w55"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-bar skel-bar--xs w25 mb10"></div>
+                <div class="skel-bar skel-bar--sm w100 mb6"></div>
+                <div class="skel-bar skel-bar--sm w90 mb6"></div>
+                <div class="skel-bar skel-bar--sm w75"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-bar skel-bar--xs w20 mb10"></div>
+                <div class="skel-flag"></div>
+                <div class="skel-flag mt6"></div>
+                <div class="skel-flag mt6"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-bar skel-bar--xs w30 mb10"></div>
+                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w40"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w35"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                <div class="skel-cost-row"><div class="skel-bar skel-bar--sm w45"></div><div class="skel-bar skel-bar--sm w20"></div></div>
+                <div class="skel-cost-row total"><div class="skel-bar skel-bar--md w30"></div><div class="skel-bar skel-bar--md w25"></div></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel-bar skel-bar--xs w25 mb10"></div>
+                <div class="skel-bar skel-bar--sm w100 mb6"></div>
+                <div class="skel-bar skel-bar--sm w85 mb6"></div>
+                <div class="skel-bar skel-bar--sm w70"></div>
+            </div>
         </div>
-        <!-- Live iframe — report streams in here -->
+        <!-- Live iframe — fades in over skeleton when report arrives -->
         <iframe id="liveFrame" sandbox="allow-same-origin" scrolling="yes"></iframe>
     </div>
 
@@ -777,9 +877,13 @@ async function generateReport(paymentId) {
                 if (segIdx % 6 === 0 || segIdx === segments.length) {
                     if (!frameVisible && assembled.indexOf('<body') !== -1) {
                         frameVisible = true;
-                        emptyState.classList.add('hidden');
                         liveFrame.srcdoc = assembled + '</body></html>';
-                        setTimeout(function() { liveFrame.classList.add('visible'); }, 60);
+                        // Fade in iframe over skeleton
+                        setTimeout(function() {
+                            liveFrame.classList.add('visible');
+                            var skel = document.getElementById('skeletonWrap');
+                            if (skel) skel.classList.add('hidden');
+                        }, 200);
                     } else if (frameVisible) {
                         liveFrame.srcdoc = assembled + '</body></html>';
                     }
@@ -791,11 +895,6 @@ async function generateReport(paymentId) {
                     currentPct = segPct;
                     document.getElementById('genPct').textContent = Math.floor(currentPct) + '%';
                     document.getElementById('genBar').style.width = Math.floor(currentPct) + '%';
-                }
-
-                // Start sharpening blur at 40% through segments
-                if (segIdx > segments.length * 0.4 && frameVisible) {
-                    liveFrame.classList.add('sharpening');
                 }
 
                 var delay = segIdx < segments.length * 0.25 ? 3 : 8;
@@ -917,11 +1016,11 @@ function resetForm() {
     document.body.classList.remove('report-active');
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
-    // Reset live frame and empty state
+    // Reset live frame and skeleton
     var lf = document.getElementById('liveFrame');
-    if (lf) { lf.srcdoc = ''; lf.classList.remove('visible'); }
-    var es = document.getElementById('genRightEmpty');
-    if (es) es.classList.remove('hidden');
+    if (lf) { lf.srcdoc = ''; lf.classList.remove('visible'); lf.style.pointerEvents = ''; }
+    var skel = document.getElementById('skeletonWrap');
+    if (skel) skel.classList.remove('hidden');
     document.getElementById('formContainer').style.display = '';
     document.querySelectorAll('input[name="price"]').forEach(function(r) { r.checked = r.value === '200'; });
     window.scrollTo({ top: 0, behavior: 'smooth' });
