@@ -502,17 +502,18 @@ function handleBetaSubmit() { generateReport(null); }
 // Eased progress curve: fast start, slows near end, holds just below 99%
 // until the report actually arrives, then snaps to 100%.
 var STEPS = [
-    { id: 'gs1', label: 'Reading your screenshots',           pct: 8,  ms: 0    },
-    { id: 'gs2', label: 'Identifying listing type & location',pct: 18, ms: 3000 },
-    { id: 'gs3', label: 'Checking market data & comparables', pct: 35, ms: 7000 },
-    { id: 'gs4', label: 'Flagging what they didn\'t tell you',pct: 52, ms: 13000},
+    { id: 'gs1', label: 'Reading your screenshots',           pct: 10, ms: 0    },
+    { id: 'gs2', label: 'Identifying listing type & location',pct: 22, ms: 3000 },
+    { id: 'gs3', label: 'Checking market data & comparables', pct: 38, ms: 7000 },
+    { id: 'gs4', label: 'Flagging what they didn\'t tell you',pct: 54, ms: 13000},
     { id: 'gs5', label: 'Calculating true cost of ownership', pct: 68, ms: 20000},
-    { id: 'gs6', label: 'Building your negotiation strategy', pct: 82, ms: 28000},
-    { id: 'gs7', label: 'Generating report',                  pct: 92, ms: 36000},
+    { id: 'gs6', label: 'Building your negotiation strategy', pct: 80, ms: 28000},
+    { id: 'gs7', label: 'Generating report',                  pct: 88, ms: 36000},
 ];
 
 var stepTimers = [];
 var pctInterval = null;
+var creepInterval = null;
 var currentPct = 0;
 var targetPct  = 0;
 
@@ -546,6 +547,10 @@ function startTicker() {
             el.classList.add('active');
             document.getElementById('genStatusText').textContent = step.label;
             targetPct = step.pct;
+            // Last step: start slow creep so ticker never freezes while waiting
+            if (i === STEPS.length - 1) {
+                setTimeout(function() { startCreep(); }, 2000);
+            }
         }, step.ms);
         stepTimers.push(t);
     });
@@ -568,6 +573,23 @@ function stopTicker() {
     stepTimers.forEach(function(t) { clearTimeout(t); });
     stepTimers = [];
     if (pctInterval) { clearInterval(pctInterval); pctInterval = null; }
+    if (creepInterval) { clearInterval(creepInterval); creepInterval = null; }
+}
+
+// Slowly creep 88% → 98% while waiting for API after all steps done
+// Keeps ticker moving so it never appears frozen
+function startCreep() {
+    if (creepInterval) return;
+    creepInterval = setInterval(function() {
+        if (currentPct < 98) {
+            currentPct = Math.min(98, currentPct + 0.04);
+            var d = Math.floor(currentPct);
+            document.getElementById('genPct').textContent = d + '%';
+            document.getElementById('genBar').style.width = d + '%';
+        } else {
+            clearInterval(creepInterval); creepInterval = null;
+        }
+    }, 80);
 }
 
 function completeTicker() {
@@ -639,21 +661,25 @@ async function generateReport(paymentId) {
         // Poll until done
         var report = await pollForReport(jobId);
 
-        // Flash report in blur layer — materialise effect
+        // Step 1: Load report into blur frame FIRST and give it time to paint
         if (report.html) {
             var blurFrame = document.getElementById('blurFrame');
             blurFrame.srcdoc = report.html;
+            // Wait for iframe to paint before starting the visual transition
+            await new Promise(function(r) { setTimeout(r, 600); });
             document.getElementById('genBlur').classList.add('visible');
+            // Brief pause so the blurred report is visible before ticker completes
+            await new Promise(function(r) { setTimeout(r, 300); });
         }
 
-        // Snap ticker to 100%
+        // Step 2: Snap ticker to 100%
         await completeTicker();
 
-        // Trigger materialize animation
+        // Step 3: Trigger materialise animation (blur sharpens, foreground fades)
         document.getElementById('genOverlay').classList.add('materializing');
 
-        // Wait for animation then switch to report view
-        await new Promise(function(r) { setTimeout(r, 1400); });
+        // Step 4: Wait for animation then switch cleanly to report view
+        await new Promise(function(r) { setTimeout(r, 1500); });
         document.getElementById('genOverlay').classList.remove('active', 'materializing');
         renderReport(report);
 
