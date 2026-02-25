@@ -248,8 +248,18 @@
         @keyframes pulse-border { 0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.3); } 50% { box-shadow: 0 0 0 4px rgba(74,222,128,0); } }
 
         /* Fade out left panel when done */
-        .gen-overlay.completing .gen-left { animation: fadeOutLeft 0.6s ease forwards; }
-        @keyframes fadeOutLeft { to { opacity: 0; transform: translateX(-16px); } }
+        .gen-overlay.completing .gen-left { animation: fadeOutLeft 0.5s ease forwards; }
+        @keyframes fadeOutLeft { to { opacity: 0; transform: translateX(-20px); } }
+
+        /* Inline report actions appended to gen-right after completion */
+        .report-actions-inline {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px 0 56px;
+            background: #ffffff;
+            flex-wrap: wrap;
+        }
 
         /* Mobile: stack vertically */
         @media (max-width: 640px) {
@@ -906,24 +916,44 @@ async function generateReport(paymentId) {
         liveFrame.srcdoc = fullHtml;
         await completeTicker();
 
-        // Transition to final report view
-        document.getElementById('genOverlay').classList.remove('active');
-        document.body.classList.add('report-active');
+        // Expand live iframe to fill full screen — no page jump
+        // Fade left panel out, let right panel take over
+        document.getElementById('genOverlay').classList.add('completing');
 
-        var mainFrame = document.getElementById('reportFrame');
-        var container = document.getElementById('reportContainer');
-        mainFrame.srcdoc = fullHtml;
-        container.classList.add('active');
+        await new Promise(function(r) { setTimeout(r, 500); });
 
+        // Switch: hide gen-left, expand gen-right to full width
+        var genLeft  = document.querySelector('.gen-left');
+        var genRight = document.getElementById('genRight');
+        genLeft.style.display = 'none';
+        genRight.style.position = 'fixed';
+        genRight.style.inset = '0';
+        genRight.style.zIndex = '201';
+        genRight.style.overflowY = 'auto';
+
+        // Give liveFrame height so it scrolls properly
+        liveFrame.style.position = 'static';
+        liveFrame.style.height = '5000px';
+        liveFrame.style.width = '100%';
+
+        // Wait for iframe to settle then size to content
         setTimeout(function() {
             try {
-                var doc = mainFrame.contentDocument;
+                var doc = liveFrame.contentDocument;
                 var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-                if (h > 100) mainFrame.style.height = (h + 32) + 'px';
-            } catch(e) { mainFrame.style.height = '5000px'; }
-        }, 800);
+                if (h > 200) liveFrame.style.height = (h + 48) + 'px';
+            } catch(e) {}
+        }, 400);
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Add download/new scan buttons inside right panel
+        var actions = document.createElement('div');
+        actions.className = 'report-actions-inline';
+        actions.innerHTML = '<button class="action-btn primary" onclick="downloadReport()">↓ Download Report</button>' +
+                            '<button class="action-btn" onclick="resetForm()">← New Scan</button>';
+        genRight.appendChild(actions);
+
+        genRight.scrollTop = 0;
+        document.getElementById('genOverlay').style.background = 'transparent';
 
     } catch (err) {
         stopTicker();
@@ -1016,11 +1046,32 @@ function resetForm() {
     document.body.classList.remove('report-active');
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
-    // Reset live frame and skeleton
+    // Reset live frame, skeleton, and gen-right expanded state
     var lf = document.getElementById('liveFrame');
-    if (lf) { lf.srcdoc = ''; lf.classList.remove('visible'); lf.style.pointerEvents = ''; }
+    if (lf) {
+        lf.srcdoc = '';
+        lf.classList.remove('visible');
+        lf.style.position = '';
+        lf.style.height = '';
+        lf.style.width = '';
+    }
     var skel = document.getElementById('skeletonWrap');
     if (skel) skel.classList.remove('hidden');
+    // Restore gen-left and gen-right to normal overlay state
+    var gl = document.querySelector('.gen-left');
+    if (gl) gl.style.display = '';
+    var gr = document.getElementById('genRight');
+    if (gr) {
+        gr.style.position = '';
+        gr.style.inset = '';
+        gr.style.zIndex = '';
+        gr.style.overflowY = '';
+        // Remove appended action buttons if any
+        var existingActions = gr.querySelector('.report-actions-inline');
+        if (existingActions) gr.removeChild(existingActions);
+    }
+    document.getElementById('genOverlay').style.background = '';
+    document.getElementById('genOverlay').classList.remove('completing');
     document.getElementById('formContainer').style.display = '';
     document.querySelectorAll('input[name="price"]').forEach(function(r) { r.checked = r.value === '200'; });
     window.scrollTo({ top: 0, behavior: 'smooth' });
