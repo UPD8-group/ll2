@@ -1,12 +1,10 @@
 /**
- * LISTING LENS — Generate Report (Background Function)
+ * LISTING LENS — Generate Report (Background Function) v2.0
  *
- * Named with -background suffix = Netlify treats as background function.
- * Browser calls this URL directly. Netlify returns 202 immediately,
- * function keeps running for up to 15 minutes.
- *
- * Route: POST /.netlify/functions/generate-report-background
- * Body:  { jobId, sessionId, paymentIntentId }
+ * Changes from v1:
+ * - Category selection removed — Claude auto-detects from screenshot
+ * - Uses fast-universal-v2.md prompt for all listings
+ * - Removed category validation
  */
 
 const Anthropic    = require('@anthropic-ai/sdk');
@@ -14,8 +12,7 @@ const fs           = require('fs');
 const path         = require('path');
 const { getStore } = require('@netlify/blobs');
 
-const VALID_CATEGORIES = ['vehicle', 'property', 'electronics', 'other'];
-const SITE_ID          = 'b95526e0-71f5-445b-97fb-eac488509a38';
+const SITE_ID = 'b95526e0-71f5-445b-97fb-eac488509a38';
 
 function blobStore() {
     return getStore({ name: 'listing-lens-sessions', siteID: SITE_ID, token: process.env.NETLIFY_TOKEN });
@@ -85,13 +82,7 @@ exports.handler = async (event) => {
             return { statusCode: 202 };
         }
 
-        const category        = meta.category;
         const screenshotCount = meta.screenshotCount;
-
-        if (!VALID_CATEGORIES.includes(category)) {
-            await store.setJSON('job/' + jobId, { status: 'error', error: 'Invalid category' });
-            return { statusCode: 202 };
-        }
 
         // Load screenshots
         const screenshots = [];
@@ -111,29 +102,23 @@ exports.handler = async (event) => {
             return { statusCode: 202 };
         }
 
-        // Load prompt
-        let systemPrompt = null;
-        if (category === 'property')    systemPrompt = loadPrompt('combined-aus-property-v3.1.md');
-        if (category === 'vehicle')     systemPrompt = loadPrompt('combined-aus-vehicle-v3.1.md');
-        if (category === 'electronics') systemPrompt = loadPrompt('combined-aus-electronics-v3.1.md');
-        if (category === 'other')       systemPrompt = loadPrompt('combined-aus-general-v3.1.md');
-        if (!systemPrompt)              systemPrompt = loadPrompt('fast-universal-v1.md');
-
+        // Load universal prompt — Claude auto-detects category from screenshot
+        let systemPrompt = loadPrompt('fast-universal-v2.md');
         if (!systemPrompt) {
-            await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing — check prompts/ folder' });
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing — check prompts/fast-universal-v2.md' });
             return { statusCode: 202 };
         }
 
         const reportId = 'LL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
         const today    = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nCategory: ' + category + '\nScreenshots: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
+        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
 
-        console.log('Job ' + jobId + ': calling Claude, ' + screenshots.length + ' screenshot(s), category: ' + category);
+        console.log('Job ' + jobId + ': calling Claude, ' + screenshots.length + ' screenshot(s)');
 
         const client   = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
         const response = await client.messages.create({
             model:      'claude-sonnet-4-6',
-            max_tokens: 8000,
+            max_tokens: 6000,
             system:     systemPrompt,
             messages:   [{
                 role: 'user',
@@ -141,7 +126,7 @@ exports.handler = async (event) => {
                     ...screenshots.map(function(s) {
                         return { type: 'image', source: { type: 'base64', media_type: s.mimeType, data: s.base64 } };
                     }),
-                    { type: 'text', text: 'Analyse this ' + category + ' listing and generate the complete Listing Lens buyer intelligence report as standalone HTML.' }
+                    { type: 'text', text: 'Analyse this listing and generate the complete Listing Lens buyer intelligence report as standalone HTML.' }
                 ]
             }]
         });
