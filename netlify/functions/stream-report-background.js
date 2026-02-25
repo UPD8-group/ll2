@@ -105,8 +105,32 @@ exports.handler = async (event) => {
             return { statusCode: 202 };
         }
 
+        // Detect listing type from quick scan metadata (stored by quick-scan function)
+        // Fall back to universal prompt if not property, or if detection unavailable
+        let promptFile = 'fast-universal-v2.md';
+        try {
+            const qsMeta = await store.get('qs/' + sessionId, { type: 'json' });
+            if (qsMeta && qsMeta.category) {
+                const cat = qsMeta.category.toLowerCase();
+                const isProperty = cat.includes('property') || cat.includes('house') || cat.includes('apartment') ||
+                                   cat.includes('unit') || cat.includes('townhouse') || cat.includes('real estate') ||
+                                   cat.includes('land') || cat.includes('acreage') || cat.includes('rural') ||
+                                   cat.includes('commercial') || cat.includes('office') || cat.includes('warehouse');
+                if (isProperty) {
+                    promptFile = 'realestate-v1.md';
+                    console.log('Job ' + jobId + ': property detected — using realestate prompt');
+                }
+            }
+        } catch (e) {
+            console.log('Job ' + jobId + ': quick scan metadata unavailable, using universal prompt');
+        }
+
         // Load prompt
-        let systemPrompt = loadPrompt('fast-universal-v2.md');
+        let systemPrompt = loadPrompt(promptFile);
+        if (!systemPrompt) {
+            // Fallback to universal if specialty prompt missing
+            systemPrompt = loadPrompt('fast-universal-v2.md');
+        }
         if (!systemPrompt) {
             await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing' });
             return { statusCode: 202 };
@@ -114,7 +138,7 @@ exports.handler = async (event) => {
 
         const reportId = 'LL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
         const today    = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
+        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\nPrompt: ' + promptFile + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
 
         console.log('Job ' + jobId + ': calling Claude, ' + screenshots.length + ' screenshot(s)');
 
