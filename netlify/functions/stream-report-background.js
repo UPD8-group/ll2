@@ -105,31 +105,42 @@ exports.handler = async (event) => {
             return { statusCode: 202 };
         }
 
-        // Detect listing type from quick scan metadata (stored by quick-scan function)
-        // Fall back to universal prompt if not property, or if detection unavailable
-        let promptFile = 'fast-universal-v4.md';
+        // Determine tier and category from session metadata
+        let tier = 'standard';
+        let category = '';
         try {
             const qsMeta = await store.get('qs/' + sessionId, { type: 'json' });
-            if (qsMeta && qsMeta.category) {
-                const cat = qsMeta.category.toLowerCase();
-                const isProperty = cat.includes('property') || cat.includes('house') || cat.includes('apartment') ||
-                                   cat.includes('unit') || cat.includes('townhouse') || cat.includes('real estate') ||
-                                   cat.includes('land') || cat.includes('acreage') || cat.includes('rural') ||
-                                   cat.includes('commercial') || cat.includes('office') || cat.includes('warehouse');
-                if (isProperty) {
-                    promptFile = 'realestate-v1.md';
-                    console.log('Job ' + jobId + ': property detected — using realestate prompt');
-                }
+            if (qsMeta) {
+                if (qsMeta.tier) tier = qsMeta.tier;
+                if (qsMeta.category) category = qsMeta.category.toLowerCase();
             }
         } catch (e) {
-            console.log('Job ' + jobId + ': quick scan metadata unavailable, using universal prompt');
+            console.log('Job ' + jobId + ': session metadata unavailable, using defaults');
         }
 
-        // Load prompt
+        const isProperty = category && (
+            category.includes('property') || category.includes('house') || category.includes('apartment') ||
+            category.includes('unit') || category.includes('townhouse') || category.includes('real estate') ||
+            category.includes('land') || category.includes('acreage') || category.includes('rural') ||
+            category.includes('commercial') || category.includes('office') || category.includes('warehouse')
+        );
+
+        let promptFile;
+        if (isProperty) {
+            promptFile = 'realestate-v1.md';
+            console.log('Job ' + jobId + ': property (' + tier + ') — using realestate prompt');
+        } else if (tier === 'deep-dive') {
+            promptFile = 'deep-dive-v1.md';
+            console.log('Job ' + jobId + ': deep-dive tier — using deep-dive prompt');
+        } else {
+            promptFile = 'fast-universal-v4.1.md';
+            console.log('Job ' + jobId + ': standard tier — using v4.1 prompt');
+        }
+
+        // Load prompt with fallback chain
         let systemPrompt = loadPrompt(promptFile);
         if (!systemPrompt) {
-            // Fallback to universal if specialty prompt missing
-            systemPrompt = loadPrompt('fast-universal-v4.md');
+            systemPrompt = loadPrompt('fast-universal-v4.1.md') || loadPrompt('fast-universal-v4.md');
         }
         if (!systemPrompt) {
             await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing' });
