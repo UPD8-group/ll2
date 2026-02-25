@@ -139,11 +139,39 @@
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-8px); } }
         @keyframes unblur { to { filter: blur(0px) brightness(1); transform: scale(1); } }
 
+        /* Corner mode: ticker shrinks to bottom-right corner while report builds */
+        .gen-overlay.corner-mode {
+            background: transparent;
+            pointer-events: none;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 0 24px 24px 0;
+        }
+        .gen-overlay.corner-mode .gen-foreground {
+            background: rgba(10,10,10,0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 20px 24px;
+            width: 280px;
+            max-width: 280px;
+            animation: shrinkToCorner 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+        }
+        .gen-overlay.corner-mode .gen-logo { display: none; }
+        .gen-overlay.corner-mode .gen-steps { display: none; }
+        .gen-overlay.corner-mode .gen-pct { font-size: 36px; margin-bottom: 4px; }
+        .gen-overlay.corner-mode .gen-pct-label { font-size: 12px; margin-bottom: 12px; }
+        .gen-overlay.corner-mode .gen-report-blur { display: none; }
+        @keyframes shrinkToCorner {
+            from { transform: scale(1); opacity: 1; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
         /* REPORT */
-        .report-container { display: none; }
-        .report-container.active { display: block; }
-        .report-iframe-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
-        #reportFrame { width: 100%; border: none; min-height: 600px; display: block; }
+        .report-container { display: none; background: #ffffff; }
+        .report-container.active { display: block; background: #ffffff; }
+        .report-iframe-wrap { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); background: #fff; }
+        #reportFrame { width: 100%; border: none; min-height: 600px; display: block; background: #fff; }
         .report-actions { display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
         .action-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--bg-white); border: 2px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.15s; text-decoration: none; }
         .action-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -742,6 +770,7 @@ function renderReport(r) {
         frame.style.height = '600px';
     }
     container.classList.add('active');
+    document.body.classList.add('report-active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -771,6 +800,7 @@ function resetForm() {
     showPaymentLoading('Securing your screenshots...');
     hidePaymentError();
     document.getElementById('reportContainer').classList.remove('active');
+    document.body.classList.remove('report-active');
     document.getElementById('reportFrame').srcdoc = '';
     document.getElementById('reportFrame').style.height = '';
     document.getElementById('blurFrame').srcdoc = '';
