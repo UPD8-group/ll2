@@ -138,7 +138,7 @@
         .gen-right-empty svg { width: 48px; height: 48px; }
         .gen-right-empty p { font-size: 13px; color: rgba(100,116,139,0.5); font-family: var(--font-mono); letter-spacing: 0.05em; }
 
-        /* Live iframe — report streams in here */
+        /* Live iframe — Grok-style blur reveal */
         #liveFrame {
             position: absolute;
             inset: 0;
@@ -148,9 +148,19 @@
             display: block;
             background: #ffffff;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            filter: blur(8px);
+            transform: scale(1.02);
+            transition: opacity 0.6s ease, filter 1.8s ease, transform 1.8s ease;
         }
-        #liveFrame.visible { opacity: 1; }
+        #liveFrame.visible {
+            opacity: 1;
+            filter: blur(8px);
+            transform: scale(1.02);
+        }
+        #liveFrame.sharpening {
+            filter: blur(0px);
+            transform: scale(1);
+        }
 
         /* Foreground content (inside left panel) */
         .gen-foreground { width: 100%; }
@@ -204,10 +214,10 @@
         .gen-report-blur { display: none; }
 
         /* REPORT (final view after gen completes) */
-        .report-container { display: none; background: #f8fafc; min-height: 100vh; }
+        .report-container { display: none; background: #ffffff; min-height: 100vh; }
         .report-container.active { display: block; }
-        .report-iframe-wrap { background: #f8fafc; }
-        #reportFrame { width: 100%; border: none; min-height: 600px; display: block; background: #f8fafc; }
+        .report-iframe-wrap { background: #ffffff; max-width: 760px; margin: 0 auto; padding: 0 0 40px; }
+        #reportFrame { width: 100%; border: none; min-height: 800px; display: block; background: #ffffff; }
         .report-actions { display: flex; justify-content: center; gap: 12px; padding: 20px 0 48px; flex-wrap: wrap; }
         .action-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--bg-white); border: 2px solid var(--border); border-radius: var(--radius); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.15s; text-decoration: none; }
         .action-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -346,9 +356,9 @@
 </div>
 
 <!-- REPORT -->
-<div class="container report-container" id="reportContainer">
+<div class="report-container" id="reportContainer">
     <div class="report-iframe-wrap">
-        <iframe id="reportFrame" sandbox="allow-same-origin" scrolling="no"></iframe>
+        <iframe id="reportFrame" sandbox="allow-same-origin" scrolling="yes"></iframe>
     </div>
     <div class="report-actions">
         <button class="action-btn primary" onclick="downloadReport()">↓ Download Report</button>
@@ -783,6 +793,11 @@ async function generateReport(paymentId) {
                     document.getElementById('genBar').style.width = Math.floor(currentPct) + '%';
                 }
 
+                // Start sharpening blur at 40% through segments
+                if (segIdx > segments.length * 0.4 && frameVisible) {
+                    liveFrame.classList.add('sharpening');
+                }
+
                 var delay = segIdx < segments.length * 0.25 ? 3 : 8;
                 setTimeout(writeNext, delay);
             }
@@ -849,19 +864,18 @@ function renderReport(r) {
         frame.onload = function() {
             try {
                 var doc = frame.contentDocument;
-                doc.documentElement.style.overflow = 'hidden';
-                doc.body.style.overflow = 'hidden';
+                // Don't restrict overflow — let content set its own height
                 var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-                if (h < 100) h = 4000;
-                frame.style.height = (h + 32) + 'px';
-            } catch (e) { frame.style.height = '4000px'; }
+                if (h < 200) h = 5000;
+                frame.style.height = (h + 48) + 'px';
+            } catch (e) { frame.style.height = '5000px'; }
             setTimeout(function() {
                 try {
                     var doc = frame.contentDocument;
                     var h = Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
-                    if (h > 100) frame.style.height = (h + 32) + 'px';
+                    if (h > 200) frame.style.height = (h + 48) + 'px';
                 } catch (e) {}
-            }, 500);
+            }, 600);
         };
     } else {
         currentReportHtml = '<html><body><pre style="padding:24px;font-family:monospace;font-size:13px;">' + esc(JSON.stringify(r, null, 2)) + '</pre></body></html>';
