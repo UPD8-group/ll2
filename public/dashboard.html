@@ -238,9 +238,10 @@
         .skel-absent { display: flex; align-items: center; gap: 8px; padding: 9px 12px;
             background: #fffbeb; border-left: 3px solid #d97706; border-radius: 0 6px 6px 0;
             font-size: 13px; color: #92400e; margin-bottom: 6px; }
+        [data-theme="dark"] .skel-absent { background: #1c1200; color: #fbbf24; border-color: #d97706; }
         .skel-cost-filled { display: flex; justify-content: space-between; padding: 7px 0;
-            border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .skel-cost-filled .amt { font-weight: 700; color: #0f172a; }
+            border-bottom: 1px solid #f1f5f9; font-size: 14px; color: var(--text); }
+        .skel-cost-filled .amt { font-weight: 700; color: var(--text); }
         .skel-q { font-size: 13px; color: #334155; padding: 6px 0 6px 12px;
             border-left: 2px solid #10b981; margin-bottom: 6px; }
 
@@ -297,6 +298,10 @@
         /* Fade out left panel when done */
         .gen-overlay.completing .gen-left { animation: fadeOutLeft 0.5s ease forwards; }
         @keyframes fadeOutLeft { to { opacity: 0; transform: translateX(-20px); } }
+
+        /* Report fullscreen container background */
+        .gen-right { background: #ffffff; }
+        [data-theme="dark"] .gen-right { background: #0f1117; }
 
         /* Inline report actions appended to gen-right after completion */
         .report-actions-inline {
@@ -1144,7 +1149,32 @@ async function generateReport(paymentId) {
             writeNext();
         });
 
-        liveFrame.srcdoc = fullHtml;
+        // Inject current theme into the report iframe
+        var currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        var themedHtml = fullHtml;
+        // Add data-theme to <html> tag if present, else prepend a style block
+        if (themedHtml.includes('<html')) {
+            themedHtml = themedHtml.replace(/<html([^>]*)>/, '<html$1 data-theme="' + currentTheme + '">');
+        }
+        // If dark mode, inject a dark override style into the report's <head>
+        if (currentTheme === 'dark' && themedHtml.includes('</head>')) {
+            var darkOverride = '<style>' +
+                'html[data-theme="dark"], html[data-theme="dark"] body { background: #0f1117 !important; color: #e8eaf0 !important; }' +
+                'html[data-theme="dark"] * { border-color: #2d3148 !important; }' +
+                'html[data-theme="dark"] .report-header, html[data-theme="dark"] header { background: #0a0f1e !important; }' +
+                'html[data-theme="dark"] .card, html[data-theme="dark"] section, html[data-theme="dark"] .section { background: #1a1d27 !important; }' +
+                'html[data-theme="dark"] h1, html[data-theme="dark"] h2, html[data-theme="dark"] h3, html[data-theme="dark"] h4 { color: #e8eaf0 !important; }' +
+                'html[data-theme="dark"] p, html[data-theme="dark"] li, html[data-theme="dark"] td, html[data-theme="dark"] span { color: #9ca3af !important; }' +
+                'html[data-theme="dark"] .label, html[data-theme="dark"] .field-label, html[data-theme="dark"] [class*="label"] { color: #6b7280 !important; }' +
+                'html[data-theme="dark"] .value, html[data-theme="dark"] .field-value, html[data-theme="dark"] [class*="value"] { color: #e8eaf0 !important; }' +
+                'html[data-theme="dark"] strong, html[data-theme="dark"] b { color: #e8eaf0 !important; }' +
+                'html[data-theme="dark"] table { background: #1a1d27 !important; }' +
+                'html[data-theme="dark"] tr:nth-child(even) { background: #20243a !important; }' +
+                'html[data-theme="dark"] a { color: #22c55e !important; }' +
+                '</style>';
+            themedHtml = themedHtml.replace('</head>', darkOverride + '</head>');
+        }
+        liveFrame.srcdoc = themedHtml;
         await completeTicker();
 
         // Fade left panel out
@@ -1162,7 +1192,7 @@ async function generateReport(paymentId) {
 
         // Pin genRight as a full-screen page
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        genRight.style.cssText = 'position:fixed;inset:0;overflow-y:auto;background:' + (isDark ? '#0f1117' : '#fff') + ';z-index:10;';
+        genRight.style.cssText = 'position:fixed;inset:0;overflow-y:auto;background:' + (isDark ? '#0f1117' : '#ffffff') + ';z-index:10;';
 
         // Size liveFrame to content
         liveFrame.style.position = 'static';
