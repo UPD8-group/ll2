@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -111,7 +111,7 @@
     .report-score.red    { color: #f87171; }
 
     /* Error */
-    .state-error { display: none; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); border-radius: 9px; margin-bottom: 16px; font-size: 13px; color: var(--red); }
+    .state-error { display: none; align-items: flex-start; gap: 10px; padding: 10px 14px; background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.18); border-radius: 9px; margin-bottom: 16px; font-size: 13px; color: #fca5a5; word-break: break-word; }
 
     /* Empty */
     .state-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px 24px; }
@@ -163,6 +163,35 @@
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { color: var(--ink-muted); text-decoration: none; }
     .footer-links a:hover { color: var(--ink); }
+
+    /* REPORT IFRAME */
+    .report-iframe-wrap { display: none; flex: 1; flex-direction: column; }
+    .report-iframe-wrap iframe { border: none; width: 100%; flex: 1; min-height: 72vh; border-radius: 8px; background: #fff; }
+    .report-open-btn { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .btn-open-new { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5); background: none; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+    .btn-open-new:hover { border-color: var(--blue-light); color: #fff; }
+
+    /* TIER PICKER */
+    .tier-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tier-btn { flex: 1; padding: 9px 8px; border: 1.5px solid var(--border); border-radius: 9px; background: rgba(255,255,255,0.03); cursor: pointer; font-family: var(--font); text-align: center; transition: all 0.15s; }
+    .tier-btn.active { border-color: var(--blue-light); background: rgba(59,109,232,0.12); }
+    .tier-btn .tier-name { display: block; font-size: 12px; font-weight: 700; color: var(--ink); }
+    .tier-btn .tier-price { display: block; font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+    .tier-btn.active .tier-name { color: var(--blue-light); }
+
+    /* PAYMENT */
+    #payment-wrap { display: none; }
+    #card-element { padding: 12px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
+    .btn-pay { width: 100%; padding: 12px; background: var(--blue-light); color: #fff; font-family: var(--font); font-size: 14px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; transition: background 0.15s; }
+    .btn-pay:hover { background: #2d5fd4; }
+    .btn-pay:disabled { opacity: 0.5; cursor: default; }
+
+    /* FOOTER */
+    footer { padding: 24px 32px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { color: var(--ink-muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--ink); }
   </style>
 </head>
 <body>
@@ -196,15 +225,36 @@
 
       <!-- IDLE CONTENT -->
       <div class="idle-content">
-        <div style="margin-bottom:20px">
+        <div style="margin-bottom:14px">
+          <div class="sidebar-label">Tier</div>
+          <div class="tier-row">
+            <button class="tier-btn active" id="tier-standard" onclick="selectTier('standard')">
+              <span class="tier-name">Standard</span>
+              <span class="tier-price">$2</span>
+            </button>
+            <button class="tier-btn" id="tier-deepdive" onclick="selectTier('deep-dive')">
+              <span class="tier-name">Deep Dive</span>
+              <span class="tier-price">$5</span>
+            </button>
+          </div>
+        </div>
+        <div style="margin-bottom:16px">
           <div class="sidebar-label">New scan</div>
           <button id="new-scan-btn" class="btn-scan">
             Start a new scan <span class="btn-scan-sub">Up to 4 images</span>
           </button>
-          <p class="upload-hint">Screenshot the listing — price, description, spec table, and photo grid. Drop all screenshots in together.</p>
+          <p class="upload-hint">Screenshot the listing — price, description, spec table, and photo grid. Drop all screenshots together.</p>
+        </div>
+        <div id="payment-wrap">
+          <div class="divider"></div>
+          <div style="margin-bottom:12px">
+            <div class="sidebar-label">Payment</div>
+            <div id="card-element"></div>
+            <button class="btn-pay" id="pay-btn">Pay &amp; Generate Report</button>
+          </div>
         </div>
         <div class="divider"></div>
-        <div style="margin-bottom:20px">
+        <div style="margin-bottom:16px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
             <div class="sidebar-label" style="margin-bottom:0">My reports (this session)</div>
             <span id="case-count" style="font-size:11px;color:var(--ink-muted)">0</span>
@@ -250,7 +300,6 @@
           <span class="skel-tag blue" id="skel-tag-type">Vehicle</span>
           <span class="skel-tag muted" id="skel-tag-status">Reading…</span>
         </div>
-        <!-- 01 -->
         <div class="skel-section">
           <div class="skel-num">01 — What this listing is</div>
           <div class="skel-grid">
@@ -260,70 +309,37 @@
             <div><div class="skel-field-lbl">Listing price</div><div class="skel-field-val" id="sk-price"><div class="skel-bar s"></div></div></div>
           </div>
         </div>
-        <!-- 02 -->
         <div class="skel-section" id="sk2" style="opacity:0.2">
-          <div class="skel-num">02 — Comparable sales & market position</div>
+          <div class="skel-num">02 — Comparable sales &amp; market position</div>
           <div class="skel-bar l"></div><div class="skel-bar m"></div><div class="skel-bar s"></div>
         </div>
-        <!-- 03 -->
         <div class="skel-section" id="sk3" style="opacity:0.2">
           <div class="skel-num">03 — True first-year cost</div>
           <div class="skel-bar m"></div><div class="skel-bar l"></div>
         </div>
-        <!-- 04 -->
         <div class="skel-section" id="sk4" style="opacity:0.2">
-          <div class="skel-num">04 — Red flags & omission analysis</div>
+          <div class="skel-num">04 — Red flags &amp; omission analysis</div>
           <div class="skel-bar l"></div><div class="skel-bar m"></div><div class="skel-bar s"></div>
         </div>
-        <!-- 05 -->
         <div class="skel-section" id="sk5" style="opacity:0.2">
           <div class="skel-num">05 — Closer questions</div>
           <div class="skel-bar m"></div><div class="skel-bar l"></div>
         </div>
-        <!-- 06 -->
         <div class="skel-section" id="sk6" style="opacity:0.2">
           <div class="skel-num">06 — Joe's verdict</div>
           <div class="skel-bar l"></div><div class="skel-bar l"></div><div class="skel-bar m"></div>
         </div>
       </div>
 
-      <!-- FINAL REPORT -->
-      <div id="report-content" class="report-body">
-        <div class="report-grid-2">
-          <div>
-            <div class="report-section-label">Verdict</div>
-            <p id="report-verdict" class="report-verdict"></p>
-          </div>
-          <div>
-            <div class="report-section-label">Quick profile</div>
-            <div class="profile-box">
-              <div id="report-type" class="profile-type"></div>
-              <div id="report-value" class="profile-value"></div>
-            </div>
-          </div>
+      <!-- FINAL REPORT — iframe -->
+      <div id="report-iframe-wrap" class="report-iframe-wrap">
+        <div class="report-open-btn">
+          <a id="open-new-tab" class="btn-open-new" target="_blank">↗ Open in new tab</a>
+          <span id="report-id-badge" style="font-size:11px;color:var(--ink-muted);margin-left:auto;"></span>
         </div>
-        <div class="flags-questions">
-          <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div class="report-section-label" style="margin-bottom:0">Red flags</div>
-              <span id="flag-count" style="font-size:11px;color:var(--ink-muted)"></span>
-            </div>
-            <ul id="flag-list" class="flag-list"></ul>
-          </div>
-          <div>
-            <div class="report-section-label">Questions to ask</div>
-            <ul id="question-list" class="question-list"></ul>
-          </div>
-        </div>
-        <div>
-          <div class="report-section-label">Extra notes</div>
-          <p id="report-notes" class="report-notes"></p>
-        </div>
-        <div class="report-footer">
-          <span id="report-meta"></span>
-          <em>Not a mechanical inspection — use this to decide what's worth booking an inspection for.</em>
-        </div>
+        <iframe id="report-frame" title="Listing Lens Report" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
       </div>
+
     </section>
 
   </div>
@@ -339,8 +355,16 @@
 </footer>
 
 <script>
-  const ANALYZE_ENDPOINT = "/.netlify/functions/analyzeListing";
+  // ── ENDPOINTS (match real Netlify functions) ──
+  const UPLOAD_URL     = '/api/upload-screenshots';
+  const QUICK_URL      = '/api/quick-scan';
+  const GENERATE_URL   = '/api/generate-report';
+  const BACKGROUND_URL = '/.netlify/functions/stream-report-background';
+  const STATUS_URL     = '/api/report-status';
+  const CONFIG_URL     = '/api/config';
+  const PAYMENT_URL    = '/api/create-payment';
 
+  // ── PROGRESS STEPS ──
   const STEPS = [
     { label: "Scanning listing for observable data",          pct: 10 },
     { label: "Identifying listing type, platform & location", pct: 22 },
@@ -350,16 +374,17 @@
     { label: "Compiling closer questions & leverage data",    pct: 82 },
     { label: "Assembling intelligence report",                pct: 95 },
   ];
-
-  // Step timing in ms — realistic feel, not too fast
   const STEP_TIMES = [1000, 2800, 5200, 8500, 13000, 18500, 25000];
-
-  // Which skeleton sections unlock at each step
   const SKEL_UNLOCK = { 1:"sk2", 2:"sk3", 3:"sk4", 4:"sk5", 5:"sk6" };
 
+  // ── STATE ──
   let cases = [], currentCaseId = null, caseCounter = 1;
   let pgInterval = null, currentPct = 0, targetPct = 0;
   let stepTimers = [];
+  let selectedTier = 'standard';
+  let appConfig = { betaMode: false, stripePk: '' };
+  let stripe = null, cardElement = null;
+  let pendingSessionId = null, pendingJobId = null;
 
   const $ = id => document.getElementById(id);
   const sidebar      = $("sidebar");
@@ -369,13 +394,71 @@
   const pgLabel      = $("pg-label");
   const emptyState   = $("empty-state");
   const skelPanel    = $("skeleton-panel");
-  const reportContent= $("report-content");
+  const iframeWrap   = $("report-iframe-wrap");
+  const reportFrame  = $("report-frame");
   const errorState   = $("error-state");
   const errorText    = $("error-text");
   const caseListEl   = $("case-list");
   const caseCountEl  = $("case-count");
   const reportTitle  = $("report-title");
   const reportScore  = $("report-score");
+  const paymentWrap  = $("payment-wrap");
+
+  // ── TIER ──
+  function selectTier(t) {
+    selectedTier = t;
+    $("tier-standard").classList.toggle("active", t === "standard");
+    $("tier-deepdive").classList.toggle("active", t === "deep-dive");
+  }
+
+  // ── CONFIG ──
+  async function loadConfig() {
+    try {
+      const res = await fetch(CONFIG_URL);
+      if (res.ok) appConfig = await res.json();
+    } catch(e) { console.warn("Config load failed, assuming beta mode"); appConfig = { betaMode: true }; }
+    if (!appConfig.betaMode && appConfig.stripePk) {
+      initStripe(appConfig.stripePk);
+    }
+  }
+
+  function initStripe(pk) {
+    if (!window.Stripe) return;
+    stripe = window.Stripe(pk);
+    const elements = stripe.elements({ appearance: { theme: 'night' } });
+    cardElement = elements.create('card', {
+      style: { base: { color: '#e8eaf0', fontFamily: 'Inter, sans-serif', fontSize: '14px' } }
+    });
+    cardElement.mount('#card-element');
+    paymentWrap.style.display = 'block';
+    $("pay-btn").addEventListener("click", handlePayment);
+  }
+
+  async function handlePayment() {
+    if (!stripe || !cardElement || !pendingSessionId) return;
+    const amountMap = { 'standard': 200, 'deep-dive': 500 };
+    const amount = amountMap[selectedTier] || 200;
+    try {
+      $("pay-btn").disabled = true;
+      $("pay-btn").textContent = "Creating payment…";
+      const res = await fetch(PAYMENT_URL, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ amount })
+      });
+      const payment = await res.json();
+      const { error, paymentIntent } = await stripe.confirmCardPayment(payment.clientSecret, {
+        payment_method: { card: cardElement }
+      });
+      if (error) throw new Error(error.message);
+      // Payment done — now generate
+      paymentWrap.style.display = 'none';
+      await startReportGeneration(pendingSessionId, paymentIntent.id);
+    } catch(e) {
+      $("pay-btn").disabled = false;
+      $("pay-btn").textContent = "Pay & Generate Report";
+      showError("Payment failed: " + (e.message || "Unknown error"));
+    }
+  }
 
   // ── PROGRESS ──
   function buildSteps() {
@@ -405,8 +488,6 @@
     pgPct.textContent = "0%";
     pgBar.style.width = "0%";
     pgLabel.textContent = STEPS[0].label;
-
-    // Tick counter
     pgInterval = setInterval(() => {
       if (currentPct < targetPct) {
         currentPct = Math.min(currentPct + 1, targetPct);
@@ -414,8 +495,6 @@
         pgBar.style.width = currentPct + "%";
       }
     }, 60);
-
-    // Step schedule
     STEP_TIMES.forEach((t, i) => {
       const timer = setTimeout(() => {
         if (!sidebar.classList.contains("scanning")) return;
@@ -423,11 +502,7 @@
         setStep(i, "active");
         targetPct = STEPS[i].pct;
         pgLabel.textContent = STEPS[i].label;
-        // Unlock skeleton section
-        if (SKEL_UNLOCK[i]) {
-          const el = $(SKEL_UNLOCK[i]);
-          if (el) el.style.opacity = "1";
-        }
+        if (SKEL_UNLOCK[i]) { const el = $(SKEL_UNLOCK[i]); if (el) el.style.opacity = "1"; }
       }, t);
       stepTimers.push(timer);
     });
@@ -436,20 +511,14 @@
   function finishProgress(cb) {
     STEPS.forEach((_, i) => setStep(i, "done"));
     pgLabel.textContent = "Complete";
-    // Unlock all remaining skeleton sections
-    ["sk2","sk3","sk4","sk5","sk6"].forEach(id => {
-      const el = $(id); if (el) el.style.opacity = "1";
-    });
+    ["sk2","sk3","sk4","sk5","sk6"].forEach(id => { const el=$(id); if(el) el.style.opacity="1"; });
     targetPct = 100;
     const done = setInterval(() => {
       if (currentPct < 100) {
         currentPct = Math.min(currentPct + 3, 100);
         pgPct.textContent = currentPct + "%";
         pgBar.style.width = currentPct + "%";
-      } else {
-        clearInterval(done);
-        setTimeout(cb, 350);
-      }
+      } else { clearInterval(done); setTimeout(cb, 350); }
     }, 25);
   }
 
@@ -462,14 +531,9 @@
   // ── STATE HELPERS ──
   function showError(msg) {
     if (!msg) { errorState.style.display = "none"; return; }
-    errorText.textContent = msg;
+    const clean = msg.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+    errorText.textContent = clean;
     errorState.style.display = "flex";
-  }
-
-  function showReport() {
-    emptyState.style.display    = "none";
-    skelPanel.style.display     = "none";
-    reportContent.style.display = "flex";
   }
 
   function resetView() {
@@ -477,58 +541,106 @@
     showError("");
     emptyState.style.display    = "flex";
     skelPanel.style.display     = "none";
-    reportContent.style.display = "none";
-    reportTitle.textContent = "No scan selected yet";
-    reportScore.textContent = "--";
-    reportScore.className   = "report-score";
-    ["report-verdict","report-type","report-value","report-notes","report-meta"].forEach(id => $(id).textContent = "");
-    $("flag-list").innerHTML = "";
-    $("flag-count").textContent = "";
-    $("question-list").innerHTML = "";
+    iframeWrap.style.display    = "none";
+    reportFrame.srcdoc          = "";
+    reportTitle.textContent     = "No scan selected yet";
+    reportScore.textContent     = "--";
+    reportScore.className       = "report-score";
   }
 
-  // ── UTILS ──
-  function fileToBase64(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onerror = () => rej(new Error("File read failed"));
-      r.onloadend = () => { const s = String(r.result||""); res(s.includes(",") ? s.split(",")[1] : s); };
-      r.readAsDataURL(file);
+  // ── UPLOAD ──
+  async function uploadFiles(files) {
+    const fd = new FormData();
+    Array.from(files).slice(0, 4).forEach(f => fd.append("screenshot", f));
+    const res = await fetch(UPLOAD_URL, { method: "POST", body: fd });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      throw new Error(t.replace(/<[^>]*>/g,"").trim().slice(0,120) || `Upload failed (${res.status})`);
+    }
+    return res.json(); // { sessionId, screenshotCount }
+  }
+
+  // ── QUICK SCAN ──
+  async function runQuickScan(sessionId) {
+    try {
+      const res = await fetch(QUICK_URL, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, tier: selectedTier })
+      });
+      if (!res.ok) return null;
+      return res.json();
+    } catch { return null; }
+  }
+
+  function applyQuickScan(qs) {
+    if (!qs) return;
+    if (qs.category) {
+      $("skel-tag-type").textContent = qs.category;
+      $("sk-cat").textContent = qs.category;
+    }
+    if (qs.price)    $("sk-price").textContent = qs.price;
+    if (qs.location) $("sk-loc").textContent   = qs.location;
+    if (qs.seller_type) $("sk-by").textContent = qs.seller_type;
+    if (qs.title)    $("skel-tag-status").textContent = qs.title.slice(0, 40);
+    $("sk2").style.opacity = "1";
+  }
+
+  // ── GENERATE ──
+  async function generateReport(sessionId) {
+    const res = await fetch(GENERATE_URL, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId })
+    });
+    if (!res.ok) throw new Error("Session validation failed — please try again");
+    return res.json(); // { jobId }
+  }
+
+  // ── BACKGROUND ──
+  function kickBackground(sessionId, jobId, paymentIntentId) {
+    // Fire-and-forget — Netlify returns 202 immediately, keeps running
+    fetch(BACKGROUND_URL, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, jobId, paymentIntentId: paymentIntentId || null })
+    }).catch(() => {});
+  }
+
+  // ── POLL ──
+  function pollStatus(jobId) {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const max = 120; // 6 minutes
+      const iv = setInterval(async () => {
+        attempts++;
+        if (attempts > max) {
+          clearInterval(iv);
+          reject(new Error("Report timed out — please try again"));
+          return;
+        }
+        try {
+          const res = await fetch(`${STATUS_URL}?jobId=${jobId}`);
+          const job = await res.json();
+          if (job.status === "complete") { clearInterval(iv); resolve(job); }
+          else if (job.status === "error") { clearInterval(iv); reject(new Error(job.error || "Report generation failed")); }
+        } catch(e) { /* keep polling */ }
+      }, 3000);
     });
   }
 
-  function scoreClass(s) {
-    if (!Number.isFinite(s)) return "report-score";
-    if (s >= 80) return "report-score green";
-    if (s >= 60) return "report-score yellow";
-    if (s >= 40) return "report-score orange";
-    return "report-score red";
-  }
+  // ── DISPLAY REPORT ──
+  function showReport(html, reportId, title) {
+    emptyState.style.display = "none";
+    skelPanel.style.display  = "none";
+    iframeWrap.style.display = "flex";
+    reportFrame.srcdoc = html;
 
-  function getVerdict(d) {
-    if (d.verdict) return d.verdict;
-    const s = d.lens_score;
-    if (s >= 80) return "Strong candidate. Proceed, but verify with a proper inspection.";
-    if (s >= 60) return "Decent candidate. Worth inspecting if logistics and budget make sense.";
-    if (s >= 40) return "Borderline. Only proceed if the seller answers key questions and price moves in your favour.";
-    return "High risk. Unless you're hunting a project and know what you're doing, walk away.";
-  }
-  function getType(d) {
-    if (d.listing_type) return d.listing_type;
-    const r = (d.vehicle_title||"").toLowerCase();
-    if (r.includes("ute")||r.includes("pickup")) return "Work / dual-purpose ute or pickup";
-    if (r.includes("4x4")||r.includes("landcruiser")) return "4x4 / off-road oriented vehicle";
-    if (r.includes("gt")||r.includes("amg")) return "Performance / enthusiast car";
-    if (r.includes("van")||r.includes("hiace")) return "Van / light commercial";
-    return "General passenger or light commercial vehicle";
-  }
-  function getValue(d) {
-    if (d.market_value_comment) return d.market_value_comment;
-    if (d.market_value_estimate) return `Indicative market positioning: ${d.market_value_estimate}. Treat as guidance only.`;
-    return "No price positioning commentary available from this report.";
-  }
-  function getNotes(d) {
-    return d.notes || "Use this report to decide whether the listing deserves a pre-purchase inspection. If anything here feels off, trust that feeling.";
+    // Open in new tab: create a blob URL
+    const blob = new Blob([html], { type: "text/html" });
+    const url  = URL.createObjectURL(blob);
+    $("open-new-tab").href = url;
+    $("report-id-badge").textContent = reportId || "";
+    reportTitle.textContent = title || "Report ready";
+    reportScore.textContent = "✓";
+    reportScore.className   = "report-score green";
   }
 
   // ── CASE LIST ──
@@ -537,11 +649,8 @@
     cases.forEach(c => {
       const li = document.createElement("li");
       li.className = "case-item" + (c.id === currentCaseId ? " active" : "");
-      li.innerHTML = `<div class="case-item-title">${c.title||"Untitled"}</div>
-        <div class="case-item-meta">
-          <span>${Number.isFinite(c.score) ? `Score: ${c.score}/100` : "Score: --"}</span>
-          <span>${c.shortTime||""}</span>
-        </div>`;
+      li.innerHTML = `<div class="case-item-title">${c.title}</div>
+        <div class="case-item-meta"><span>${c.tier}</span><span>${c.shortTime}</span></div>`;
       li.addEventListener("click", () => selectCase(c.id));
       caseListEl.appendChild(li);
     });
@@ -553,105 +662,108 @@
     if (!c) return;
     currentCaseId = id;
     renderCases();
-    populateReport(c.data);
+    showReport(c.html, c.reportId, c.title);
   }
 
-  function populateReport(data) {
-    if (!data) return;
-    showError(""); showReport();
-    const score = typeof data.lens_score === "number" ? data.lens_score : null;
-    reportTitle.textContent = data.vehicle_title || data.title || "Unknown vehicle";
-    reportScore.textContent = score !== null ? String(score) : "--";
-    reportScore.className   = scoreClass(score);
-    $("report-verdict").textContent = getVerdict(data);
-    $("report-type").textContent    = getType(data);
-    $("report-value").textContent   = getValue(data);
-    $("report-notes").textContent   = getNotes(data);
-
-    const flagEl = $("flag-list"), cntEl = $("flag-count");
-    flagEl.innerHTML = "";
-    const flags = Array.isArray(data.red_flags) ? data.red_flags : [];
-    cntEl.textContent = flags.length ? `${flags.length} issue(s)` : "";
-    if (flags.length) {
-      flags.forEach(f => {
-        const li = document.createElement("li");
-        li.className = "flag-item";
-        li.innerHTML = `<span class="flag-dot"></span><span>${f}</span>`;
-        flagEl.appendChild(li);
-      });
-    } else {
-      flagEl.insertAdjacentHTML("beforeend", `<li class="list-empty">No major red flags called out. Still treat this as an initial filter.</li>`);
-    }
-
-    const qEl = $("question-list");
-    qEl.innerHTML = "";
-    const qs = Array.isArray(data.questions_to_ask||data.questions) ? (data.questions_to_ask||data.questions) : [];
-    if (qs.length) {
-      qs.forEach(q => {
-        const li = document.createElement("li");
-        li.className = "question-item";
-        li.innerHTML = `<span class="q-dot"></span><span>${q}</span>`;
-        qEl.appendChild(li);
-      });
-    } else {
-      qEl.insertAdjacentHTML("beforeend", `<li class="list-empty">No specific questions listed.</li>`);
-    }
-
-    $("report-meta").textContent = `Report generated: ${data.generated_at||new Date().toLocaleString()}`;
-  }
-
-  // ── SCAN ──
-  async function handleScan(files) {
-    if (!files||!files.length) return;
-    showError("");
-    emptyState.style.display    = "none";
-    reportContent.style.display = "none";
-    skelPanel.style.display     = "flex";
-    // Reset skeleton sections
-    ["sk2","sk3","sk4","sk5","sk6"].forEach(id => { const el=$(id); if(el) el.style.opacity="0.2"; });
-    sidebar.classList.add("scanning");
-    startProgress();
-
+  // ── MAIN SCAN FLOW ──
+  async function startReportGeneration(sessionId, paymentIntentId) {
     try {
-      const b64 = await Promise.all(Array.from(files).slice(0,4).map(fileToBase64));
-      const res = await fetch(ANALYZE_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imagesBase64: b64 })
-      });
-      if (!res.ok) throw new Error((await res.text().catch(()=>"")) || `Backend error (${res.status})`);
-      const payload = await res.json();
-      const data = payload?.data?.data || payload?.data || payload;
+      // Step 1: get jobId
+      const { jobId } = await generateReport(sessionId);
+      pendingJobId = jobId;
 
+      // Step 2: kick background (fire and forget)
+      kickBackground(sessionId, jobId, paymentIntentId);
+
+      // Step 3: run quick scan in parallel to populate skeleton
+      runQuickScan(sessionId).then(qs => applyQuickScan(qs));
+
+      // Step 4: poll until done
+      const job = await pollStatus(jobId);
+
+      // Step 5: display
       finishProgress(() => {
         stopProgress();
         const now = new Date();
         const nc = {
           id: `case-${caseCounter++}`,
-          title: data.vehicle_title || "Unknown vehicle",
-          score: typeof data.lens_score === "number" ? data.lens_score : null,
-          shortTime: now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}),
-          data
+          title: job.reportId || "Report",
+          reportId: job.reportId,
+          html: job.html,
+          tier: selectedTier,
+          shortTime: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         };
         cases.unshift(nc);
         currentCaseId = nc.id;
         renderCases();
-        populateReport(data);
+        showReport(job.html, job.reportId, job.reportId || "Report ready");
       });
 
     } catch(err) {
-      console.error("Scan error:", err);
+      console.error("Report generation error:", err);
       stopProgress();
       showError(err?.message || "Analysis failed. Please try again.");
-      emptyState.style.display    = "flex";
-      skelPanel.style.display     = "none";
+      emptyState.style.display = "flex";
+      skelPanel.style.display  = "none";
+    }
+  }
+
+  async function handleScan(files) {
+    if (!files || !files.length) return;
+    showError("");
+    emptyState.style.display = "none";
+    iframeWrap.style.display = "none";
+    skelPanel.style.display  = "flex";
+    ["sk2","sk3","sk4","sk5","sk6"].forEach(id => { const el=$(id); if(el) el.style.opacity="0.2"; });
+    $("skel-tag-type").textContent   = selectedTier === "deep-dive" ? "Deep Dive" : "Vehicle";
+    $("skel-tag-status").textContent = "Reading…";
+    ["sk-cat","sk-by","sk-loc","sk-price"].forEach(id => { const el=$(id); if(el) el.innerHTML='<div class="skel-bar s"></div>'; });
+
+    sidebar.classList.add("scanning");
+    startProgress();
+
+    try {
+      // Upload first
+      const { sessionId } = await uploadFiles(files);
+      pendingSessionId = sessionId;
+
+      if (appConfig.betaMode) {
+        // Skip payment — go straight to report
+        await startReportGeneration(sessionId, null);
+      } else {
+        // Show payment form — user clicks Pay to continue
+        stopProgress();
+        sidebar.classList.remove("scanning");
+        emptyState.style.display = "none";
+        paymentWrap.style.display = "block";
+        $("pay-btn").disabled = false;
+        $("pay-btn").textContent = `Pay & Generate Report`;
+        // Re-show sidebar idle content so user sees payment form
+        sidebar.classList.remove("scanning");
+        // Put skeleton back as placeholder
+        skelPanel.style.display = "flex";
+        showError("");
+        reportTitle.textContent = "Complete payment to generate report";
+      }
+    } catch(err) {
+      console.error("Upload error:", err);
+      stopProgress();
+      showError(err?.message || "Upload failed. Please try again.");
+      emptyState.style.display = "flex";
+      skelPanel.style.display  = "none";
     }
   }
 
   // ── INIT ──
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     resetView();
-    const startNewScan = () => { showError(""); $("file-input").value = ""; $("file-input").click(); };
+    await loadConfig();
+
+    const startNewScan = () => {
+      showError("");
+      $("file-input").value = "";
+      $("file-input").click();
+    };
     $("new-scan-btn").addEventListener("click", startNewScan);
     $("empty-state-btn").addEventListener("click", startNewScan);
     $("file-input").addEventListener("change", e => {
