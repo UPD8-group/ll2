@@ -1,857 +1,362 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Listing Lens — Joe doesn't care about your feelings. He cares about your money.</title>
-    <meta name="description" content="Upload a screenshot of any car, property, or item listing. Get Joe's brutally honest buyer intelligence report in under a minute. $2. No account needed.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #060912;
-            --white: #0c1428;
-            --ink: #e8eaf0;
-            --ink-sec: #9ca3af;
-            --ink-muted: #5a6380;
-            --border: rgba(255,255,255,0.09);
-            --blue: #7BA7FF;
-            --blue-mid: #5585f5;
-            --blue-light: #3B6DE8;
-            --blue-bg: rgba(59,109,232,0.12);
-            --blue-glow: rgba(59,109,232,0.15);
-            --green: #4ade80;
-            --green-bg: rgba(74,222,128,0.1);
-            --amber: #fbbf24;
-            --amber-bg: rgba(251,191,36,0.1);
-            --red: #f87171;
-            --red-bg: rgba(248,113,113,0.1);
-            --radius: 12px;
-            --font: 'Inter', -apple-system, sans-serif;
-            --font-display: 'Space Grotesk', sans-serif;
-        }
+  <meta charset="utf-8" />
+  <title>Listing Lens — Scan any listing before it costs you</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="AI-powered listing analysis for buyers and sellers. Know exactly what a listing looks like — before you commit." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream:#f0ebe3;--cream-dark:#e8e0d5;--cream-mid:#ede7de;--white:#ffffff;
+      --ink:#1a1714;--ink-sec:#5c5650;--ink-muted:#a09890;
+      --green:#2cb67d;--green-dark:#1d9963;--green-pale:#e8f7f0;--green-border:rgba(44,182,125,0.25);
+      --amber:#f59e0b;--blob:#c8dfd4;
+      --border:rgba(0,0,0,0.08);--border-med:rgba(0,0,0,0.12);
+      --shadow-sm:0 1px 3px rgba(0,0,0,0.07);
+      --shadow-md:0 4px 16px rgba(0,0,0,0.09);
+      --shadow-lg:0 16px 48px rgba(0,0,0,0.12);
+      --r:16px;--font:'DM Sans',sans-serif;--display:'Bricolage Grotesque',sans-serif;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:var(--font);background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    /* NAV */
+    nav{position:sticky;top:0;z-index:200;background:rgba(240,235,227,0.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);}
+    .nav-inner{max-width:1120px;margin:0 auto;padding:0 36px;display:flex;align-items:center;height:64px;gap:36px;}
+    .logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0;}
+    .logo-mark{width:30px;height:30px;background:var(--ink);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .logo-mark svg{width:14px;height:14px;}
+    .logo-name{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:-0.4px;color:var(--ink);}
+    .nav-links{display:flex;gap:28px;list-style:none;flex:1;}
+    .nav-links a{font-size:14px;font-weight:500;color:var(--ink-sec);text-decoration:none;transition:color 0.15s;}
+    .nav-links a:hover{color:var(--ink);}
+    .nav-cta{margin-left:auto;}
+    .btn-nav-solid{font-size:13px;font-weight:600;color:#fff;text-decoration:none;padding:8px 18px;background:var(--ink);border-radius:100px;transition:all 0.2s;}
+    .btn-nav-solid:hover{background:#2d2926;transform:translateY(-1px);}
+    @media(max-width:700px){.nav-links{display:none;}}
 
-        /* ── NAV ── */
-        nav {
-            position: sticky; top: 0; z-index: 100;
-            background: rgba(12,15,26,0.96);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            padding: 0 32px;
-        }
-        .nav-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 62px; }
-        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
-        .logo-icon { width: 34px; height: 34px; background: var(--blue-light); border-radius: 9px; display: flex; align-items: center; justify-content: center; }
-        .logo-icon svg { width: 18px; height: 18px; }
-        .logo-text { font-family: var(--font-display); font-weight: 800; font-size: 17px; letter-spacing: -0.3px; color: #fff; }
-        .nav-right { display: flex; align-items: center; gap: 28px; }
-        .nav-link { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.15s; }
-        .nav-link:hover { color: rgba(255,255,255,0.9); }
-        .nav-cta {
-            font-family: var(--font); font-size: 14px; font-weight: 700;
-            padding: 10px 22px; background: var(--blue-light); color: #fff;
-            border: none; border-radius: 9px; cursor: pointer; text-decoration: none;
-            transition: background 0.15s;
-        }
-        .nav-cta:hover { background: #2d5fd4; }
-        @media (max-width: 600px) { .nav-link { display: none; } }
+    /* HERO */
+    .hero-outer{background:var(--cream);overflow:hidden;}
+    .hero-wrap{max-width:1120px;margin:0 auto;padding:0 36px 72px;position:relative;min-height:560px;display:flex;align-items:flex-end;}
+    .hero-blob{position:absolute;top:-20px;right:50px;width:500px;height:500px;background:var(--blob);border-radius:50%;z-index:0;animation:blob-float 6s ease-in-out infinite;}
+    @keyframes blob-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.02)}}
+    .hero-joe{position:absolute;top:-64px;right:36px;width:420px;height:530px;z-index:2;animation:joe-enter 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s both;}
+    @keyframes joe-enter{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+    .hero-joe img{width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:24px;box-shadow:var(--shadow-lg);filter:saturate(0.88) contrast(1.04);}
+    .joe-overlay-card{position:absolute;bottom:20px;left:-24px;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-radius:14px;padding:14px 16px;width:214px;border:1px solid rgba(255,255,255,0.9);box-shadow:var(--shadow-md);animation:card-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.65s both;}
+    @keyframes card-enter{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+    .joe-overlay-label{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;}
+    .joe-overlay-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--ink-sec);line-height:1.4;margin-bottom:6px;}
+    .joe-overlay-item:last-child{margin-bottom:0;}
+    .joe-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:3px;}
+    .hero-content{position:relative;z-index:3;max-width:540px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.05s both;}
+    @keyframes hero-text-enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    .hero-persona-tag{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border-med);border-radius:100px;padding:5px 12px 5px 8px;font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-sec);margin-bottom:22px;}
+    .hero-persona-dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
+    .hero-h1{font-family:var(--display);font-size:clamp(44px,6vw,74px);font-weight:800;line-height:1.04;letter-spacing:-2px;color:var(--ink);margin-bottom:20px;}
+    .hero-h1 em{font-style:normal;color:var(--green-dark);}
+    .hero-sub{font-size:17px;color:var(--ink-sec);line-height:1.7;max-width:400px;margin-bottom:36px;}
+    .hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+    .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-family:var(--font);font-size:15px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 14px rgba(26,23,20,0.2);}
+    .btn-hero-primary:hover{background:#2d2926;transform:translateY(-2px);box-shadow:0 8px 20px rgba(26,23,20,0.26);}
+    .btn-hero-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--ink-sec);font-family:var(--font);font-size:15px;font-weight:500;padding:14px 22px;border-radius:100px;text-decoration:none;border:1.5px solid var(--border-med);transition:all 0.2s;}
+    .btn-hero-secondary:hover{border-color:var(--ink);color:var(--ink);}
+    .hero-price-note{font-size:12px;color:var(--ink-muted);margin-top:14px;display:flex;align-items:center;gap:6px;}
+    .hero-price-note span{background:var(--green-pale);color:var(--green-dark);font-weight:700;padding:2px 8px;border-radius:5px;font-size:11px;}
+    @media(max-width:860px){
+      .hero-wrap{flex-direction:column;min-height:auto;padding-bottom:0;padding-top:36px;}
+      .hero-blob{display:none;}
+      .hero-joe{position:relative;top:auto;right:auto;width:100%;height:300px;margin-top:32px;}
+      .joe-overlay-card{left:12px;}
+      .hero-content{max-width:100%;}
+    }
 
-        /* ── HERO ── */
-        .hero {
-            background: linear-gradient(160deg, #060912 0%, #0c1428 50%, #0f1f45 100%);
-            min-height: 92vh;
-            display: flex; flex-direction: column;
-            justify-content: center;
-            padding: 80px 32px 72px;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -40%;
-            right: -20%;
-            width: 70vw; height: 70vw;
-            background: radial-gradient(ellipse, rgba(59,109,232,0.12) 0%, transparent 65%);
-            pointer-events: none;
-        }
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(59,109,232,0.4), transparent);
-        }
-        .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+    /* PROOF TICKER */
+    .proof-strip{background:var(--ink);color:#fff;overflow:hidden;padding:18px 0;}
+    .proof-track{display:flex;gap:60px;align-items:center;animation:ticker 22s linear infinite;white-space:nowrap;}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .proof-item{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .proof-num{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-1px;color:var(--green);}
+    .proof-text{font-size:13px;color:rgba(255,255,255,0.55);max-width:140px;line-height:1.4;}
 
-        .hero-joe-badge {
-            display: inline-flex; align-items: center; gap: 10px;
-            font-family: var(--font-display);
-            font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-            color: #7BA7FF;
-            background: rgba(59,109,232,0.12);
-            border: 1px solid rgba(59,109,232,0.25);
-            border-radius: 100px; padding: 6px 18px;
-            margin-bottom: 36px;
-        }
-        .hero-joe-dot { width: 6px; height: 6px; background: #3B6DE8; border-radius: 50%; animation: blink 2s ease infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    /* AUDIENCE */
+    .audience-outer{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+    .audience-grid{max-width:1120px;margin:0 auto;padding:72px 36px;display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+    @media(max-width:700px){.audience-grid{grid-template-columns:1fr;}}
+    .audience-card{border:1.5px solid var(--border-med);border-radius:20px;padding:36px;background:var(--cream);position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+    .audience-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+    .aud-accent{position:absolute;top:0;left:0;right:0;height:4px;background:var(--ink);border-radius:20px 20px 0 0;}
+    .aud-accent.green{background:var(--green);}
+    .aud-type{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px;}
+    .aud-dot{width:8px;height:8px;border-radius:50%;background:var(--ink);}
+    .aud-dot.green{background:var(--green);}
+    .audience-card h3{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-0.8px;color:var(--ink);line-height:1.2;margin-bottom:14px;}
+    .audience-card p{font-size:15px;color:var(--ink-sec);line-height:1.7;margin-bottom:28px;}
+    .aud-features{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+    .aud-feat{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--ink-sec);line-height:1.5;}
+    .feat-check{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--green-pale);margin-top:1px;}
+    .feat-check svg{width:10px;height:10px;stroke:var(--green-dark);stroke-width:2.5;fill:none;}
+    .btn-aud{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-size:14px;font-weight:600;padding:12px 22px;border-radius:100px;text-decoration:none;transition:all 0.2s;cursor:pointer;border:none;}
+    .btn-aud.dark{background:var(--ink);color:#fff;}
+    .btn-aud.dark:hover{background:#2d2926;transform:translateY(-1px);}
+    .btn-aud.outline{background:transparent;color:var(--ink);border:1.5px solid var(--border-med);}
+    .btn-aud.outline:hover{border-color:var(--ink);transform:translateY(-1px);}
 
-        .hero h1 {
-            font-family: var(--font-display);
-            font-size: clamp(44px, 7vw, 80px);
-            font-weight: 800;
-            line-height: 0.95;
-            letter-spacing: -2px;
-            color: #fff;
-            margin-bottom: 32px;
-        }
-        .hero h1 .name { color: #3B6DE8; }
-        .hero h1 .sub {
-            display: block;
-            font-size: clamp(18px, 3vw, 32px);
-            font-weight: 500;
-            letter-spacing: -0.5px;
-            color: rgba(255,255,255,0.45);
-            margin-top: 14px;
-        }
+    /* HOW IT WORKS */
+    .section{max-width:1120px;margin:0 auto;padding:72px 36px;}
+    .section-label{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;}
+    .section-title{font-family:var(--display);font-size:clamp(30px,4vw,46px);font-weight:800;letter-spacing:-1.5px;color:var(--ink);line-height:1.1;margin-bottom:16px;}
+    .section-sub{font-size:16px;color:var(--ink-sec);line-height:1.7;max-width:500px;margin-bottom:48px;}
+    .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+    @media(max-width:700px){.how-grid{grid-template-columns:1fr;}}
+    .how-step{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:28px;transition:transform 0.2s;}
+    .how-step:hover{transform:translateY(-3px);}
+    .how-num{font-family:var(--display);font-size:48px;font-weight:800;color:var(--cream-dark);letter-spacing:-2px;line-height:1;margin-bottom:16px;}
+    .how-step h4{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-0.3px;color:var(--ink);margin-bottom:10px;}
+    .how-step p{font-size:14px;color:var(--ink-sec);line-height:1.7;}
 
-        .hero-desc {
-            font-size: 20px; line-height: 1.65;
-            color: rgba(255,255,255,0.55);
-            max-width: 560px;
-            margin-bottom: 14px;
-        }
-        .hero-callout {
-            font-size: 15px; color: rgba(255,255,255,0.3);
-            margin-bottom: 40px;
-        }
-        .hero-callout strong { color: rgba(255,255,255,0.7); }
+    /* MEET JOE */
+    .meet-outer{background:var(--white);border-top:1px solid var(--border);}
+    .meet-grid{max-width:1120px;margin:0 auto;padding:80px 36px;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+    @media(max-width:860px){.meet-grid{grid-template-columns:1fr;gap:36px;}}
+    .meet-img-wrap{position:relative;}
+    .meet-blob{position:absolute;top:-28px;left:-28px;right:-28px;bottom:-28px;background:var(--blob);border-radius:50%;z-index:0;}
+    .meet-photo{position:relative;z-index:1;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:top center;border-radius:20px;box-shadow:var(--shadow-lg);filter:saturate(0.88) contrast(1.04);}
+    .meet-content .section-title em{font-style:normal;color:var(--green-dark);}
+    .meet-sub{font-size:16px;color:var(--ink-sec);line-height:1.75;margin-bottom:20px;}
+    .what-box{background:var(--cream);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:32px;}
+    .what-box-label{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;}
+    .what-list{display:flex;flex-direction:column;gap:9px;}
+    .what-item{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--ink-sec);line-height:1.5;}
+    .what-bullet{width:6px;height:6px;border-radius:50%;background:var(--ink-muted);flex-shrink:0;margin-top:5px;}
 
-        .hero-cta-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 60px; }
-        .hero-cta {
-            display: inline-flex; align-items: center; gap: 10px;
-            font-family: var(--font); font-size: 17px; font-weight: 700;
-            padding: 18px 36px;
-            background: var(--blue-light); color: #fff;
-            border: none; border-radius: var(--radius); cursor: pointer; text-decoration: none;
-            transition: all 0.2s;
-            box-shadow: 0 0 0 0 rgba(59,109,232,0.3);
-        }
-        .hero-cta:hover { background: #2d5fd4; transform: translateY(-1px); box-shadow: 0 8px 32px rgba(59,109,232,0.35); }
-        .hero-cta-sub { font-size: 13px; color: rgba(255,255,255,0.3); }
+    /* PRICING */
+    .price-outer{background:var(--white);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+    .price-inner{max-width:800px;margin:0 auto;padding:80px 36px;text-align:center;}
+    .price-card{background:var(--cream);border:1.5px solid var(--border-med);border-radius:24px;padding:52px 48px;margin-top:48px;position:relative;overflow:hidden;}
+    .price-card-top{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--green),#6dcca4);}
+    .price-big{font-family:var(--display);font-size:84px;font-weight:800;letter-spacing:-4px;color:var(--ink);line-height:1;margin-bottom:8px;}
+    .price-big sup{font-size:38px;vertical-align:super;letter-spacing:0;}
+    .price-tagline{font-size:16px;color:var(--ink-sec);margin-bottom:40px;}
+    .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;text-align:left;margin-bottom:44px;}
+    @media(max-width:500px){.price-grid{grid-template-columns:1fr;}}
+    .pi-item{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--ink-sec);line-height:1.5;}
+    .pi-check{width:18px;height:18px;border-radius:50%;flex-shrink:0;background:var(--green-pale);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+    .pi-check svg{width:9px;height:9px;stroke:var(--green-dark);stroke-width:2.5;fill:none;}
+    .btn-price{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-family:var(--font);font-size:16px;font-weight:600;padding:16px 36px;border-radius:100px;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 16px rgba(26,23,20,0.22);}
+    .btn-price:hover{background:#2d2926;transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,23,20,0.28);}
+    .price-note{font-size:12px;color:var(--ink-muted);margin-top:16px;}
 
-        .hero-stats {
-            display: flex; gap: 40px; flex-wrap: wrap;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255,255,255,0.07);
-        }
-        .hero-stat {}
-        .hero-stat-num {
-            font-family: var(--font-display);
-            font-size: 28px; font-weight: 800;
-            color: #fff; letter-spacing: -1px;
-        }
-        .hero-stat-label { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:36px;}
+    .footer-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+    .footer-logo{font-family:var(--display);font-size:15px;font-weight:800;letter-spacing:-0.3px;color:var(--ink);text-decoration:none;}
+    .footer-links{display:flex;gap:24px;}
+    .footer-links a{font-size:13px;color:var(--ink-muted);text-decoration:none;transition:color 0.15s;}
+    .footer-links a:hover{color:var(--ink);}
+    .footer-copy{font-size:12px;color:var(--ink-muted);}
 
-        /* ── JOE SECTION ── */
-        .joe-section { background: #030609; padding: 88px 32px; }
-        .joe-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-        @media (max-width: 720px) { .joe-inner { grid-template-columns: 1fr; gap: 48px; } }
-
-        .joe-label {
-            font-family: var(--font-display);
-            font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
-            color: var(--blue-light); margin-bottom: 16px;
-        }
-        .joe-headline {
-            font-family: var(--font-display);
-            font-size: clamp(32px, 4.5vw, 52px);
-            font-weight: 800; line-height: 1.05;
-            letter-spacing: -1.5px; color: #fff;
-            margin-bottom: 24px;
-        }
-        .joe-headline em { font-style: italic; color: rgba(255,255,255,0.4); }
-        .joe-body { font-size: 16px; color: rgba(255,255,255,0.45); line-height: 1.8; margin-bottom: 28px; }
-        .joe-traits { display: flex; flex-direction: column; gap: 12px; }
-        .joe-trait {
-            display: flex; align-items: flex-start; gap: 12px;
-            padding: 14px 18px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-        }
-        .joe-trait-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-        .joe-trait-text {}
-        .joe-trait-text strong { display: block; font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
-        .joe-trait-text span { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.5; }
-
-        /* Joe's card on the right */
-        .joe-card {
-            background: #0a0d19;
-            border: 1px solid rgba(59,109,232,0.2);
-            border-radius: 16px;
-            padding: 28px;
-            box-shadow: 0 0 60px rgba(59,109,232,0.08);
-        }
-        .joe-card-header {
-            display: flex; align-items: center; gap: 14px;
-            padding-bottom: 20px; margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-        .joe-avatar {
-            width: 52px; height: 52px; border-radius: 50%;
-            background: linear-gradient(135deg, #1B3A7A, #3B6DE8);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; flex-shrink: 0;
-        }
-        .joe-name { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: #fff; }
-        .joe-title { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-        .joe-verdict {
-            font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.7;
-            border-left: 3px solid var(--blue-light);
-            padding-left: 14px; margin-bottom: 20px;
-            font-style: italic;
-        }
-        .joe-flags { display: flex; flex-direction: column; gap: 8px; }
-        .joe-flag {
-            display: flex; align-items: flex-start; gap: 10px;
-            padding: 10px 12px; border-radius: 8px;
-            font-size: 13px; font-weight: 600; line-height: 1.4;
-        }
-        .joe-flag.r { background: rgba(220,38,38,0.1); color: #fca5a5; }
-        .joe-flag.a { background: rgba(180,83,9,0.1); color: #fbbf24; }
-        .joe-flag.g { background: rgba(22,128,60,0.12); color: #86efac; }
-        .joe-score-row {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-top: 20px; padding-top: 16px;
-            border-top: 1px solid rgba(255,255,255,0.07);
-        }
-        .joe-score-num {
-            font-family: var(--font-display); font-size: 44px; font-weight: 800;
-            color: #3B6DE8; letter-spacing: -2px;
-        }
-        .joe-score-label { font-size: 12px; color: rgba(255,255,255,0.4); text-align: right; }
-
-        /* ── PERSONAS (Coming Soon) ── */
-        .personas-section { background: #080c1c; padding: 80px 32px; }
-        .personas-inner { max-width: 960px; margin: 0 auto; }
-        .section-label {
-            font-family: var(--font-display);
-            font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
-            color: var(--blue-light); margin-bottom: 12px;
-        }
-        .section-h {
-            font-family: var(--font-display);
-            font-size: clamp(28px, 4vw, 44px);
-            font-weight: 800; letter-spacing: -1px;
-            line-height: 1.1; margin-bottom: 16px; color: #e8eaf0;
-        }
-        .section-sub { font-size: 17px; color: var(--ink-sec); max-width: 560px; margin-bottom: 48px; line-height: 1.65; }
-
-        .personas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-        @media (max-width: 800px) { .personas-grid { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 480px) { .personas-grid { grid-template-columns: 1fr; } }
-
-        .persona-card {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 24px 20px;
-            position: relative; overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .persona-card.active { border-color: var(--blue-light); box-shadow: 0 0 0 1px var(--blue-light), 0 8px 32px rgba(59,109,232,0.1); }
-        .persona-card.active:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px var(--blue-light), 0 16px 48px rgba(59,109,232,0.15); }
-        .persona-card.soon { opacity: 0.55; }
-        .persona-badge {
-            position: absolute; top: 12px; right: 12px;
-            font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-            padding: 2px 8px; border-radius: 4px;
-        }
-        .persona-badge.live { background: rgba(74,222,128,0.15); color: #4ade80; }
-        .persona-badge.coming { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); }
-        .persona-emoji { font-size: 30px; margin-bottom: 14px; display: block; }
-        .persona-name {
-            font-family: var(--font-display); font-size: 17px; font-weight: 800;
-            color: #e8eaf0; margin-bottom: 6px;
-        }
-        .persona-role { font-size: 12px; font-weight: 600; color: var(--blue-light); margin-bottom: 10px; }
-        .persona-desc { font-size: 13px; color: var(--ink-sec); line-height: 1.6; }
-
-        /* ── PROOF STRIP ── */
-        .proof-strip {
-            background: #030609; border-top: 1px solid rgba(255,255,255,0.07);
-            border-bottom: 1px solid rgba(255,255,255,0.07); padding: 18px 32px;
-        }
-        .proof-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 36px; flex-wrap: wrap; }
-        .proof-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.45); }
-        .proof-item svg { width: 15px; height: 15px; color: var(--blue-light); flex-shrink: 0; }
-        .proof-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
-        @media (max-width: 600px) { .proof-divider { display: none; } .proof-inner { gap: 16px; } }
-
-        /* ── HOW IT WORKS ── */
-        .steps-wrap { max-width: 960px; margin: 0 auto; padding: 80px 32px 0; }
-        .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; }
-        @media (max-width: 700px) { .steps { grid-template-columns: 1fr; gap: 24px; } }
-        .step-num {
-            width: 38px; height: 38px;
-            background: rgba(59,109,232,0.12); color: var(--blue-light);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 800; font-size: 15px;
-            margin-bottom: 18px; border: 1px solid rgba(59,109,232,0.25);
-        }
-        .step h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; color: #e8eaf0; }
-        .step p { font-size: 15px; color: var(--ink-sec); line-height: 1.7; }
-
-        /* ── WHAT YOU GET ── */
-        .what-wrap { max-width: 960px; margin: 72px auto 0; padding: 0 32px; }
-        .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 680px) { .what-grid { grid-template-columns: 1fr; } }
-        .what-item { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
-        .what-icon { font-size: 22px; margin-bottom: 10px; }
-        .what-item h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8eaf0; }
-        .what-item p { font-size: 14px; color: var(--ink-sec); line-height: 1.6; }
-        .what-item.featured { background: rgba(59,109,232,0.12); border-color: rgba(59,109,232,0.2); }
-        .what-item.featured h3 { color: #7BA7FF; }
-        .what-item.featured p { color: #93c5fd; }
-
-        /* ── FLIP CARD ── */
-        .card-wrap { max-width: 540px; margin: 56px auto 0; padding: 0 32px; }
-        .card-label { text-align: center; font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 16px; }
-        .flip-card { perspective: 1200px; cursor: pointer; user-select: none; }
-        .flip-card-inner { position: relative; transition: transform 0.65s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
-        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-        .flip-card-back { position: absolute; top: 0; left: 0; right: 0; transform: rotateY(180deg); }
-
-        .mock { background: #0c1428; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(15,23,42,0.08); overflow: hidden; }
-        .mock-property-img { width: calc(100% + 48px); height: 140px; margin: -24px -24px 20px -24px; display: block; background: linear-gradient(135deg, #030609 0%, #0c1428 40%, #1B3A7A 100%); position: relative; overflow: hidden; }
-        .mock-property-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.3) 100%); }
-        .mock-property-badge { position: absolute; top: 12px; left: 12px; z-index: 1; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: rgba(59,109,232,0.9); border: 1px solid rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 4px; }
-        .mock-property-addr { position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 1; }
-        .mock-property-addr .addr-main { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.2; }
-        .mock-property-addr .addr-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
-        .mock-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.15); }
-        .mock-brand { font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-        .mock-id { font-size: 10px; color: var(--ink-muted); }
-        .mock-score { display: flex; align-items: center; gap: 16px; background: var(--ink); color: #fff; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
-        .mock-num { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: #3B6DE8; line-height: 1; }
-        .mock-verdict-wrap { flex: 1; }
-        .mock-verdict-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
-        .mock-verdict { font-size: 12px; color: #94a3b8; line-height: 1.4; }
-        .mock-disc-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 4px; margin-bottom: 10px; background: #FFFBEB; color: #B45309; border: 1px solid rgba(180,83,9,0.2); }
-        .mock-flag { padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid; font-size: 12px; font-weight: 600; line-height: 1.35; }
-        .mock-flag.r { background: rgba(248,113,113,0.1); border-color: #f87171; color: #fca5a5; }
-        .mock-flag.a { background: rgba(251,191,36,0.1); border-color: #fbbf24; color: #fde68a; }
-        .mock-flag.g { background: rgba(74,222,128,0.1); border-color: #4ade80; color: #86efac; }
-        .flip-hint { text-align: center; font-size: 12px; font-weight: 600; color: var(--blue-light); margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .mock-section { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin: 12px 0 7px; }
-        .mock-cost { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: #9ca3af; }
-        .mock-cost span:last-child { font-weight: 700; color: #e8eaf0; }
-        .mock-cost.total { border-top: 2px solid var(--ink); border-bottom: none; padding-top: 7px; }
-        .mock-cost.total span { font-weight: 800; color: #e8eaf0; }
-        .mock-q { font-size: 12px; color: #9ca3af; padding: 5px 10px; background: rgba(255,255,255,0.04); border-left: 2px solid var(--blue-light); border-radius: 3px; margin-bottom: 5px; line-height: 1.45; }
-        .mock-scores-row { display: flex; gap: 5px; margin-bottom: 2px; }
-        .mock-pill { flex: 1; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 3px; }
-        .mock-pill-num { display: block; font-family: var(--font-display); font-size: 15px; font-weight: 800; }
-        .mock-pill-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); }
-        .back-scroll { max-height: 540px; overflow-y: auto; scrollbar-width: none; }
-        .back-scroll::-webkit-scrollbar { display: none; }
-        .mock-checklist { display: flex; flex-direction: column; gap: 4px; }
-        .mock-check { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--ink-sec); }
-        .mock-check::before { content: '☐'; font-size: 13px; color: var(--blue-light); flex-shrink: 0; }
-        .mock-closer { background: rgba(59,109,232,0.12); border-left: 3px solid var(--blue-light); padding: 8px 10px; border-radius: 0 5px 5px 0; margin-bottom: 5px; }
-        .mock-closer-topic { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-light); margin-bottom: 3px; }
-        .mock-closer-q { font-size: 11px; font-style: italic; color: #93c5fd; line-height: 1.4; }
-
-        /* ── TRUST ── */
-        .trust { max-width: 900px; margin: 56px auto 0; padding: 0 32px 80px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-        .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 500; padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 100px; }
-        .trust-item svg { width: 14px; height: 14px; color: var(--blue-light); flex-shrink: 0; }
-
-        /* ── FAQ ── */
-        .faq { background: #080c1c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 72px 32px; }
-        .faq-inner { max-width: 680px; margin: 0 auto; }
-        .faq-list { display: flex; flex-direction: column; gap: 8px; }
-        .faq-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: rgba(255,255,255,0.03); }
-        .faq-q { width: 100%; text-align: left; background: transparent; border: none; padding: 20px 22px; font-family: var(--font); font-size: 15px; font-weight: 700; color: #e8eaf0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; line-height: 1.4; }
-        .faq-q:hover { background: rgba(255,255,255,0.04); }
-        .faq-arrow { width: 18px; height: 18px; flex-shrink: 0; color: var(--blue-light); transition: transform 0.2s; }
-        .faq-item.open .faq-arrow { transform: rotate(180deg); }
-        .faq-a { display: none; padding: 16px 22px 20px; font-size: 14px; color: var(--ink-sec); line-height: 1.75; border-top: 1px solid var(--border); }
-        .faq-item.open .faq-a { display: block; }
-
-        /* ── PRIVACY ── */
-        .privacy { max-width: 960px; margin: 0 auto; padding: 72px 32px; }
-        .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
-        @media (max-width: 700px) { .privacy-grid { grid-template-columns: 1fr; } }
-        .privacy-intro { font-size: 16px; color: var(--ink-sec); line-height: 1.75; margin-bottom: 20px; }
-        .privacy-callout { background: rgba(59,109,232,0.1); border: 1px solid rgba(59,109,232,0.2); border-radius: var(--radius); padding: 18px 22px; font-size: 14px; color: #93c5fd; line-height: 1.65; }
-        .privacy-items { display: flex; flex-direction: column; gap: 12px; }
-        .privacy-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; }
-        .pi-icon { width: 34px; height: 34px; border-radius: 8px; background: rgba(59,109,232,0.12); color: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .pi-icon svg { width: 16px; height: 16px; }
-        .pi-text h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; color: #e8eaf0; }
-        .pi-text p { font-size: 13px; color: var(--ink-sec); line-height: 1.5; }
-
-        /* ── CTA BOTTOM ── */
-        .cta-bottom {
-            background: linear-gradient(160deg, #060912 0%, #0c1428 60%, #0f1f45 100%);
-            padding: 88px 32px; text-align: center;
-            position: relative; overflow: hidden;
-        }
-        .cta-bottom::before {
-            content: '';
-            position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
-            width: 60vw; height: 60vw;
-            background: radial-gradient(ellipse, rgba(59,109,232,0.1) 0%, transparent 65%);
-            pointer-events: none;
-        }
-        .cta-bottom-eyebrow { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #7BA7FF; margin-bottom: 20px; position: relative; }
-        .cta-bottom h2 { font-family: var(--font-display); font-size: clamp(28px, 4vw, 52px); color: #fff; margin-bottom: 14px; line-height: 1.08; letter-spacing: -1px; position: relative; }
-        .cta-bottom h2 em { font-style: italic; color: #3B6DE8; }
-        .cta-bottom p { font-size: 17px; color: rgba(255,255,255,0.45); margin-bottom: 36px; line-height: 1.65; max-width: 440px; margin-left: auto; margin-right: auto; position: relative; }
-        .cta-bottom a { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font); font-size: 17px; font-weight: 700; padding: 18px 36px; background: var(--blue-light); color: #fff; border-radius: var(--radius); text-decoration: none; transition: all 0.2s; position: relative; }
-        .cta-bottom a:hover { background: #2d5fd4; transform: translateY(-1px); }
-        .cta-sub { margin-top: 14px; font-size: 13px; color: rgba(255,255,255,0.25); position: relative; }
-
-        /* ── FOOTER ── */
-        footer { padding: 28px 32px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.3); }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-muted); }
-        .footer-links { display: flex; gap: 20px; }
-        .footer-links a { color: var(--ink-muted); text-decoration: none; }
-        .footer-links a:hover { color: var(--ink); }
-
-            </style>
+    /* REVEAL */
+    .reveal{opacity:0;transform:translateY(22px);transition:opacity 0.6s ease,transform 0.6s ease;}
+    .reveal.visible{opacity:1;transform:translateY(0);}
+    .d1{transition-delay:0.1s;} .d2{transition-delay:0.2s;} .d3{transition-delay:0.3s;}
+  </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-    <div class="nav-inner">
-        <a href="/" class="logo">
-            <div class="logo-icon"><svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" stroke-linecap="round"/></svg></div>
-            <span class="logo-text">Listing Lens</span>
-        </a>
-        <div class="nav-right">
-            <a href="#how-it-works" class="nav-link">How it works</a>
-            <a href="#faq" class="nav-link">FAQ</a>
-            <a href="/dashboard.html" class="nav-cta">Analyse a listing →</a>
-        </div>
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <div class="logo-mark"><svg fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" stroke-linecap="round"/></svg></div>
+      <span class="logo-name">Listing Lens.</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#for-sellers">For sellers</a></li>
+      <li><a href="#meet-joe">Meet Joe</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="/dashboard.html" class="btn-nav-solid">Scan a listing →</a>
     </div>
+  </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-    <div class="hero-inner">
-        <div class="hero-joe-badge">
-            <span class="hero-joe-dot"></span>
-            Meet Joe · Listing Lens
-        </div>
-
-        <h1>
-            <span class="name">Meet Joe</span> he doesn't care<br>about your feelings.
-            <span class="sub">He cares about saving you money.</span>
-        </h1>
-
-        <p class="hero-desc">Joe is a pissed-off mechanic who reads every listing like it's hiding something. Upload a screenshot. Get his honest read.</p>
-        <p class="hero-callout">A buyer's advocate costs <strong>$3,000–$5,000.</strong> Joe costs <strong>less than a coffee.</strong></p>
-
-        <div class="hero-cta-wrap">
-            <a href="/dashboard.html" class="hero-cta">Get Joe's Read →</a>
-            <span class="hero-cta-sub">$2 Standard · $5 Deep Dive · No account needed</span>
-        </div>
-
-        <div class="hero-stats">
-            <div class="hero-stat">
-                <div class="hero-stat-num">$2</div>
-                <div class="hero-stat-label">Standard report</div>
-            </div>
-            <div class="hero-stat">
-                <div class="hero-stat-num">&lt;1 min</div>
-                <div class="hero-stat-label">Report delivery</div>
-            </div>
-            <div class="hero-stat">
-                <div class="hero-stat-num">15 min</div>
-                <div class="hero-stat-label">Until screenshots deleted</div>
-            </div>
-            <div class="hero-stat">
-                <div class="hero-stat-num">0</div>
-                <div class="hero-stat-label">Accounts required</div>
-            </div>
-        </div>
+<div class="hero-outer">
+  <div class="hero-wrap">
+    <div class="hero-blob"></div>
+    <div class="hero-joe">
+      <img src="https://listinglens.app/images/meetjoe.jpg" alt="Joe — Listing Lens analyst" />
+      <div class="joe-overlay-card">
+        <div class="joe-overlay-label">What Joe checks</div>
+        <div class="joe-overlay-item"><span class="joe-dot"></span>Decodes listing fluff into reality</div>
+        <div class="joe-overlay-item"><span class="joe-dot"></span>Flags missing info &amp; mismatches</div>
+        <div class="joe-overlay-item"><span class="joe-dot"></span>Spots known faults for the model</div>
+        <div class="joe-overlay-item"><span class="joe-dot"></span>Gives you the exact questions to ask</div>
+      </div>
     </div>
-</section>
-
-<!-- PROOF STRIP -->
-<div class="proof-strip">
-    <div class="proof-inner">
-        <div class="proof-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> Works on any car listing</div>
-        <div class="proof-divider"></div>
-        <div class="proof-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" stroke-linecap="round"/></svg> Carsales · Gumtree · Facebook · AutoTrader</div>
-        <div class="proof-divider"></div>
-        <div class="proof-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/></svg> PPSR · Transfer duty · Comparables · Flags</div>
-        <div class="proof-divider"></div>
-        <div class="proof-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Screenshots deleted in 15 min</div>
+    <div class="hero-content">
+      <div class="hero-persona-tag"><span class="hero-persona-dot"></span>AI-Powered Listing Analysis</div>
+      <h1 class="hero-h1">Know exactly<br>what a listing<br><em>really means.</em></h1>
+      <p class="hero-sub">Whether you're buying or selling — Joe scans the screenshots, reads between the lines, and gives you a plain-English verdict in minutes.</p>
+      <div class="hero-actions">
+        <a href="/dashboard.html" class="btn-hero-primary">Scan a listing →</a>
+        <a href="#how-it-works" class="btn-hero-secondary">See how it works</a>
+      </div>
+      <div class="hero-price-note"><span>$3</span> per analysis · No subscription · No account required</div>
     </div>
+  </div>
 </div>
 
-<!-- MEET JOE -->
-<section class="joe-section">
-    <div class="joe-inner">
-        <div>
-            <div class="joe-label">The Brain Behind the Report</div>
-            <h2 class="joe-headline">
-                30 years under<br>the hood.<br>
-                <em>Zero patience<br>for dodgy ads.</em>
-            </h2>
-            <p class="joe-body">Joe doesn't care if the seller's a nice person. He cares if the service history adds up, if the price makes sense, and if the things they didn't photograph are the things you should be most worried about.</p>
-            <div class="joe-traits">
-                <div class="joe-trait">
-                    <span class="joe-trait-icon">🔍</span>
-                    <div class="joe-trait-text">
-                        <strong>Distrusts perfect listings</strong>
-                        <span>If everything looks polished, Joe looks harder. That's when sellers are hiding something.</span>
-                    </div>
-                </div>
-                <div class="joe-trait">
-                    <span class="joe-trait-icon">📋</span>
-                    <div class="joe-trait-text">
-                        <strong>Cares about what's missing</strong>
-                        <span>No service history? No engine bay photo? No explanation? Joe notices every gap.</span>
-                    </div>
-                </div>
-                <div class="joe-trait">
-                    <span class="joe-trait-icon">💬</span>
-                    <div class="joe-trait-text">
-                        <strong>Gives you the questions that matter</strong>
-                        <span>Not generic checklist stuff. The exact words to say on the phone that are hard to deflect.</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div>
-            <div class="joe-card">
-                <div class="joe-card-header">
-                    <div class="joe-avatar">🔧</div>
-                    <div>
-                        <div class="joe-name">Joe</div>
-                        <div class="joe-title">Listing Lens · Vehicle Intelligence</div>
-                    </div>
-                </div>
-                <div class="joe-verdict">
-                    "2022 LDV T60 Max at $34,990. Engine bay not photographed. Service history 'available on request' — which means they don't want to show you until you're already emotionally invested. And this is a T60: LDV is currently in Federal Court over ACCC proceedings alleging this model has a documented propensity to rust within 5 years. That's not a rumour. That's an active court case."
-                </div>
-                <div class="joe-flags">
-                    <div class="joe-flag r">🔴 No engine bay photos — standard at this price on Carsales</div>
-                    <div class="joe-flag r">🔴 ACCC Federal Court proceedings (April 2025) — T60 alleged to rust within 5 years; 5,000+ complaints on record</div>
-                    <div class="joe-flag a">🟡 Service history withheld — request before you drive out</div>
-                    <div class="joe-flag a">🟡 $3,490 above comparable sales in this bracket</div>
-                    <div class="joe-flag g">🟢 47 days on market — negotiation window is open</div>
-                </div>
-                <div class="joe-score-row">
-                    <div class="joe-score-num">41</div>
-                    <div class="joe-score-label">SIGNIFICANT concerns<br>Completeness score</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<!-- PROOF TICKER -->
+<div class="proof-strip">
+  <div class="proof-track">
+    <div class="proof-item"><span class="proof-num">6</span><span class="proof-text">sections in every report</span></div>
+    <div class="proof-item"><span class="proof-num">$3</span><span class="proof-text">flat. No surprises.</span></div>
+    <div class="proof-item"><span class="proof-num">~2min</span><span class="proof-text">from upload to verdict</span></div>
+    <div class="proof-item"><span class="proof-num">4</span><span class="proof-text">screenshots, that's all you need</span></div>
+    <div class="proof-item"><span class="proof-num">0</span><span class="proof-text">account required to scan</span></div>
+    <div class="proof-item"><span class="proof-num">6</span><span class="proof-text">sections in every report</span></div>
+    <div class="proof-item"><span class="proof-num">$3</span><span class="proof-text">flat. No surprises.</span></div>
+    <div class="proof-item"><span class="proof-num">~2min</span><span class="proof-text">from upload to verdict</span></div>
+    <div class="proof-item"><span class="proof-num">4</span><span class="proof-text">screenshots, that's all you need</span></div>
+    <div class="proof-item"><span class="proof-num">0</span><span class="proof-text">account required to scan</span></div>
+  </div>
+</div>
 
-<!-- PERSONA ROADMAP -->
-<section class="personas-section">
-    <div class="personas-inner">
-        <div class="section-label">Listing Lens Voices</div>
-        <h2 class="section-h">Different buyers need<br>different reads.</h2>
-        <p class="section-sub">Joe handles vehicles. More voices are coming — each one tuned to a different kind of buyer, a different kind of listing.</p>
-        <div class="personas-grid">
-            <div class="persona-card active">
-                <span class="persona-badge live">✓ Live now</span>
-                <span class="persona-emoji">🔧</span>
-                <div class="persona-name">Joe</div>
-                <div class="persona-role">The Mechanic</div>
-                <div class="persona-desc">30 years under the hood. Brutal about service history, engine bays, and anything a seller didn't photograph. Perfect for vehicles.</div>
-            </div>
-            <div class="persona-card soon">
-                <span class="persona-badge coming">Coming soon</span>
-                <span class="persona-emoji">👨‍👩‍👧</span>
-                <div class="persona-name">The Concerned Father</div>
-                <div class="persona-role">Family Car Intelligence</div>
-                <div class="persona-desc">Safety ratings, ANCAP scores, boot space, ISOFIX points. The read a dad does before putting his kids in the back.</div>
-            </div>
-            <div class="persona-card soon">
-                <span class="persona-badge coming">Coming soon</span>
-                <span class="persona-emoji">🏠</span>
-                <div class="persona-name">The Property Pro</div>
-                <div class="persona-role">Real Estate Intelligence</div>
-                <div class="persona-desc">Strata health, flood overlays, comparable sales, stamp duty to the dollar. The full picture before you set foot at an inspection.</div>
-            </div>
-            <div class="persona-card soon">
-                <span class="persona-badge coming">Coming soon</span>
-                <span class="persona-emoji">📱</span>
-                <div class="persona-name">The Know-It-All Friend</div>
-                <div class="persona-role">Electronics Intelligence</div>
-                <div class="persona-desc">iCloud lock risks, known faults, battery health, what it's really worth secondhand. For phones, laptops, and anything with a screen.</div>
-            </div>
-        </div>
+<!-- AUDIENCE CARDS -->
+<div class="audience-outer" id="for-sellers">
+  <div class="audience-grid">
+    <div class="audience-card reveal">
+      <div class="aud-accent"></div>
+      <div class="aud-type"><span class="aud-dot"></span>For Buyers</div>
+      <h3>Don't get burned<br>by a shiny listing.</h3>
+      <p>Sellers polish. Joe cuts through it. Upload screenshots and get a plain-English breakdown of what the listing is actually telling you — and what it's leaving out.</p>
+      <div class="aud-features">
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Red flags and omissions called out clearly</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Comparable sales &amp; market position</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>True first-year cost of ownership</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Exact questions to ask before you buy</div>
+      </div>
+      <a href="/dashboard.html" class="btn-aud dark">Scan a listing →</a>
     </div>
-</section>
-
-<!-- FLIP CARD DEMO -->
-<div class="card-wrap">
-    <p class="card-label">Sample report — click to see full detail</p>
-    <div class="flip-card" onclick="this.classList.toggle('flipped')" role="button" aria-label="Click to see report detail">
-        <div class="flip-card-inner">
-            <div class="flip-card-front">
-                <div class="mock">
-                    <div class="mock-property-img">
-                        <span class="mock-property-badge">🔧 Joe's Report · Vehicle</span>
-                        <div class="mock-property-addr">
-                            <div class="addr-main">2022 LDV T60 Max · 23,400 km</div>
-                            <div class="addr-sub">Manual · Diesel · Brisbane QLD · Carsales · $34,990</div>
-                        </div>
-                    </div>
-                    <div class="mock-header">
-                        <span class="mock-brand">Listing Lens</span>
-                        <span class="mock-id">LL-9P4K1 · 26 Feb 2026</span>
-                    </div>
-                    <div class="mock-disc-badge" style="background:rgba(248,113,113,0.1);color:#f87171;border-color:rgba(248,113,113,0.2);">🔴 SIGNIFICANT concerns</div>
-                    <div class="mock-score">
-                        <div class="mock-num">41</div>
-                        <div class="mock-verdict-wrap">
-                            <div class="mock-verdict-label">Joe's completeness score</div>
-                            <div class="mock-verdict">Engine bay absent. Service history withheld. T60 subject to active ACCC Federal Court proceedings over rust — 5,000+ complaints on record. Price $3,490 above comparable range.</div>
-                        </div>
-                    </div>
-                    <div class="mock-flag r">🔴 Engine bay not photographed — oil, coolant & maintenance condition unassessable</div>
-                    <div class="mock-flag r">🔴 ACCC v LDV (Federal Court, Apr 2025) — T60 alleged to rust within 5 years; 5,000+ complaints on record</div>
-                    <div class="mock-flag a">🟡 Service history "available on request" — ask before you make the trip</div>
-                    <div class="mock-flag a">🟡 $3,490 above the comparable range (2022 T60 Max, QLD, similar km)</div>
-                    <div class="mock-flag g">🟢 47 days on market — leverage window is open</div>
-                    <div class="flip-hint">Click to see costs, questions & PPSR info →</div>
-                </div>
-            </div>
-            <div class="flip-card-back">
-                <div class="mock">
-                    <div class="back-scroll">
-                        <div class="mock-header">
-                            <span class="mock-brand">Listing Lens</span>
-                            <span class="mock-id">LL-9P4K1 · Full detail</span>
-                        </div>
-                        <div class="mock-section">Score Breakdown</div>
-                        <div class="mock-scores-row">
-                            <div class="mock-pill"><span class="mock-pill-num">6</span><span class="mock-pill-lbl">Price</span></div>
-                            <div class="mock-pill"><span class="mock-pill-num">3</span><span class="mock-pill-lbl">Condition</span></div>
-                            <div class="mock-pill"><span class="mock-pill-num" style="color:#DC2626">2</span><span class="mock-pill-lbl">History</span></div>
-                            <div class="mock-pill"><span class="mock-pill-num">7</span><span class="mock-pill-lbl">Seller</span></div>
-                            <div class="mock-pill"><span class="mock-pill-num" style="color:#DC2626">3</span><span class="mock-pill-lbl">Run Cost</span></div>
-                        </div>
-                        <div class="mock-section">True First-Year Cost (QLD)</div>
-                        <div class="mock-cost"><span>Purchase price</span><span>$34,990</span></div>
-                        <div class="mock-cost"><span>QLD transfer duty</span><span>$1,050</span></div>
-                        <div class="mock-cost"><span>Registration transfer</span><span>~$350</span></div>
-                        <div class="mock-cost"><span>CTP insurance (est.)</span><span>~$650/yr</span></div>
-                        <div class="mock-cost"><span>Comprehensive insurance (est.)</span><span>~$1,400/yr</span></div>
-                        <div class="mock-cost"><span>Pre-purchase inspection</span><span>$250–$350</span></div>
-                        <div class="mock-cost total"><span>First-year total (est.)</span><span>~$38,700</span></div>
-                        <div class="mock-section">Joe's Closer Script</div>
-                        <div class="mock-closer">
-                            <div class="mock-closer-topic">Engine bay</div>
-                            <div class="mock-closer-q">"Any chance of a couple of engine bay shots? Specifically around the coolant reservoir and the area near the rocker cover."</div>
-                        </div>
-                        <div class="mock-closer">
-                            <div class="mock-closer-topic">Service history</div>
-                            <div class="mock-closer-q">"It says recently serviced — can you send through a photo of the last stamp in the logbook before I make the trip out?"</div>
-                        </div>
-                        <div class="mock-section">Pre-Purchase Checklist</div>
-                        <div class="mock-checklist">
-                            <div class="mock-check">Run PPSR check ($2, ppsr.gov.au) — confirms finance, write-off, stolen</div>
-                            <div class="mock-check">Check ACCC proceedings: accc.gov.au — T60 is subject to active Federal Court case over rust</div>
-                            <div class="mock-check">Inspect undercarriage, sills, and wheel arches specifically for early corrosion</div>
-                            <div class="mock-check">Book independent pre-purchase inspection with licensed mechanic</div>
-                            <div class="mock-check">Request logbook photos for last 3 services before visiting</div>
-                            <div class="mock-check">Check recalls.gov.au for LDV T60 2022 model year</div>
-                        </div>
-                        <div class="flip-hint">← Flip back</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="audience-card reveal d2">
+      <div class="aud-accent green"></div>
+      <div class="aud-type"><span class="aud-dot green"></span>For Sellers</div>
+      <h3>See your ad through<br>a buyer's eyes.</h3>
+      <p>Before you post, run your own listing through Joe. Find the gaps, fix the price, sharpen the description — and attract serious buyers instead of tyre-kickers.</p>
+      <div class="aud-features">
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Spot what buyers will question first</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Price benchmarked against real comps</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Missing info flagged before they ask</div>
+        <div class="aud-feat"><span class="feat-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Write a listing that closes faster</div>
+      </div>
+      <a href="/dashboard.html" class="btn-aud outline">Audit my listing →</a>
     </div>
+  </div>
 </div>
 
 <!-- HOW IT WORKS -->
-<div class="steps-wrap" id="how-it-works">
-    <div class="section-label">How it works</div>
-    <h2 class="section-h" style="margin-bottom:48px;">Three steps.<br>Under a minute.</h2>
-    <div class="steps">
-        <div class="step">
-            <div class="step-num">1</div>
-            <h3>Screenshot the listing</h3>
-            <p>See something on Carsales, Facebook Marketplace, Gumtree, AutoTrader — anywhere. Screenshot the listing photos and the description. That's all Joe needs.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">2</div>
-            <h3>Upload & choose your tier</h3>
-            <p>Drop the screenshots in. Standard at $2 covers the full intelligence picture. Deep Dive at $5 adds Joe's verdict, a 5-dimension score, and a pre-purchase checklist.</p>
-        </div>
-        <div class="step">
-            <div class="step-num">3</div>
-            <h3>Walk in with Joe's read</h3>
-            <p>What they didn't photograph. What the price actually says. The exact words to use on the phone. In your hands before you make the trip.</p>
-        </div>
+<div id="how-it-works">
+  <div class="section">
+    <div class="section-label">Simple process</div>
+    <h2 class="section-title">Three steps.<br>Plain truth.</h2>
+    <p class="section-sub">No account. No signup. Upload screenshots, pay $3, and get a full report in about two minutes.</p>
+    <div class="how-grid">
+      <div class="how-step reveal">
+        <div class="how-num">01</div>
+        <h4>Screenshot the listing</h4>
+        <p>Grab the price, description, spec table, and photo grid. Up to four images. Any listing — cars, property, equipment, boats.</p>
+      </div>
+      <div class="how-step reveal d1">
+        <div class="how-num">02</div>
+        <h4>Upload &amp; pay $3</h4>
+        <p>Drop your screenshots into the dashboard. Joe gets to work — cross-referencing comps, checking facts, mapping what's missing.</p>
+      </div>
+      <div class="how-step reveal d2">
+        <div class="how-num">03</div>
+        <h4>Get your verdict</h4>
+        <p>A six-section intelligence report in roughly two minutes. Print it, share it, or use it to negotiate. It's yours to keep.</p>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- WHAT YOU GET -->
-<div class="what-wrap">
-    <div class="what-grid">
-        <div class="what-item featured">
-            <div class="what-icon">🔍</div>
-            <h3>Disclosure Intensity Rating</h3>
-            <p>OPEN / SELECTIVE / GUARDED — how transparent is this listing compared to what's normal on this platform at this price point. Joe rates it directly.</p>
-        </div>
-        <div class="what-item">
-            <div class="what-icon">📊</div>
-            <h3>Comparable sales</h3>
-            <p>3–4 recent comparables with prices and specs. If this listing is $3,490 above the midpoint, Joe says that — as a dollar figure, not vague language.</p>
-        </div>
-        <div class="what-item">
-            <div class="what-icon">💰</div>
-            <h3>True first-year cost</h3>
-            <p>Transfer duty, registration, CTP, insurance, scheduled maintenance — everything that comes due in year one. Calculated for the correct jurisdiction.</p>
-        </div>
-        <div class="what-item">
-            <div class="what-icon">🚩</div>
-            <h3>Omission analysis</h3>
-            <p>What's missing from the listing — and why it matters. No engine bay? No service history? Joe names the gap and what you can't assess without it.</p>
-        </div>
-        <div class="what-item">
-            <div class="what-icon">❓</div>
-            <h3>The Closer Script</h3>
-            <p>Three questions written exactly as you'd say them on the phone. Easy to ask, hard to deflect. Derived from what this listing specifically didn't show you.</p>
-        </div>
-        <div class="what-item featured">
-            <div class="what-icon">📋</div>
-            <h3>Deep Dive: Verdict + Score</h3>
-            <p>Joe's full assessment — Proceed / Investigate / Significant Concerns — with a 5-dimension score and pre-purchase checklist. $5.</p>
-        </div>
+<!-- MEET JOE -->
+<div class="meet-outer" id="meet-joe">
+  <div class="meet-grid">
+    <div class="meet-img-wrap reveal">
+      <div class="meet-blob"></div>
+      <img class="meet-photo" src="https://listinglens.app/images/meetjoe.jpg" alt="Joe" />
     </div>
+    <div class="meet-content reveal d1">
+      <div class="section-label">Your analyst</div>
+      <h2 class="section-title">Meet Joe.<br><em>He cares about facts.</em></h2>
+      <p class="meet-sub">Joe is the Listing Lens inspection engine. He reads listings the way a sceptical mechanic walks around a car — looking for what doesn't add up, what's missing, and what it'll really cost you.</p>
+      <div class="what-box">
+        <div class="what-box-label">What he does</div>
+        <div class="what-list">
+          <div class="what-item"><span class="what-bullet"></span>Decodes listing language into plain facts</div>
+          <div class="what-item"><span class="what-bullet"></span>Flags missing info, mismatches, and "too clean" photos</div>
+          <div class="what-item"><span class="what-bullet"></span>Calls out known faults for the model, year, or type</div>
+          <div class="what-item"><span class="what-bullet"></span>Spits out the exact questions you should ask</div>
+          <div class="what-item"><span class="what-bullet"></span>Tells sellers how a buyer will actually read their ad</div>
+        </div>
+      </div>
+      <a href="/dashboard.html" class="btn-aud dark">Try a scan for $3 →</a>
+    </div>
+  </div>
 </div>
 
-<!-- TRUST STRIP -->
-<div class="trust">
-    <div class="trust-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Screenshots deleted in 15 min</div>
-    <div class="trust-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> No account required</div>
-    <div class="trust-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg> Secure payment via Stripe</div>
-    <div class="trust-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> Report in under a minute</div>
-    <div class="trust-item"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Works worldwide</div>
+<!-- PRICING -->
+<div class="price-outer">
+  <div class="price-inner">
+    <div class="section-label">Simple pricing</div>
+    <h2 class="section-title reveal">One price.<br>Everything included.</h2>
+    <div class="price-card reveal">
+      <div class="price-card-top"></div>
+      <div class="price-big"><sup>$</sup>3</div>
+      <p class="price-tagline">per listing analysis · no subscription · no account needed</p>
+      <div class="price-grid">
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Full 6-section report</div>
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Comparable sales &amp; market position</div>
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Red flags &amp; omission analysis</div>
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>True first-year cost estimate</div>
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Closer questions &amp; leverage points</div>
+        <div class="pi-item"><span class="pi-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Joe's plain-English verdict</div>
+      </div>
+      <a href="/dashboard.html" class="btn-price">Scan a listing now →</a>
+      <p class="price-note">Pay by card · Secure checkout · Report ready in ~2 minutes</p>
+    </div>
+  </div>
 </div>
 
-<!-- FAQ -->
-<section class="faq" id="faq">
-    <div class="faq-inner">
-        <div class="section-label">Common questions</div>
-        <h2 class="section-h" style="margin-bottom:32px;">Things buyers ask.</h2>
-        <div class="faq-list">
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">What's the difference between Standard and Deep Dive?
-                    <svg class="faq-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="faq-a">Standard ($2) gives you the full intelligence picture: disclosure intensity, omission analysis, comparable sales, true first-year cost, and the Closer Script. Deep Dive ($5) adds Joe's Verdict (Proceed / Investigate / Significant Concerns), a 5-dimension score with reasoning, and a listing-specific pre-purchase checklist. Both are worth it before a serious purchase.</div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">Does it work for any car listing?
-                    <svg class="faq-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="faq-a">Yes — Carsales, Gumtree, Facebook Marketplace, AutoTrader, private listings, dealer ads. If you can screenshot it, Joe can read it. New to the platform? Just tell Joe where it's from and what you're looking at.</div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">Can you really get all that from a screenshot?
-                    <svg class="faq-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="faq-a">The screenshot tells Joe the make, model, year, mileage, price, seller type, platform, and location. From there he applies market knowledge, model-specific issues, recall history, and jurisdiction costs. What he can't tell from a screenshot — specific PPSR status, logbook stamps — he flags explicitly with instructions on how to get it.</div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">What happens to my screenshots?
-                    <svg class="faq-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="faq-a">Held in encrypted temporary storage for a maximum of 15 minutes — just enough to generate your report — then automatically and permanently deleted. We keep no copy, no backup, no archive. This isn't a policy; it's how the system is built.</div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-q" onclick="toggleFaq(this)">Why only $2?
-                    <svg class="faq-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="faq-a">We want Joe to be the thing every buyer does before every serious purchase — not something most people decide isn't worth it. At $2, there's no reason not to run a report on anything you're seriously considering. A pre-purchase inspection costs $250–$350. Joe is the filter you run before you even make the call.</div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- PRIVACY -->
-<section class="privacy" id="privacy">
-    <div class="privacy-grid">
-        <div>
-            <div class="section-label">Privacy by design</div>
-            <h2 class="section-h" style="margin-bottom:18px;">We don't want<br>your data.</h2>
-            <p class="privacy-intro">No accounts. No history. No profiles. Your screenshots go in, Joe's report comes out, then everything is gone.</p>
-            <div class="privacy-callout">
-                <strong style="display:block;margin-bottom:6px;font-weight:700;color:var(--blue);">This isn't a policy. It's the architecture.</strong>
-                Data we don't keep can't be leaked, subpoenaed, or hacked. That's the whole design.
-            </div>
-        </div>
-        <div class="privacy-items">
-            <div class="privacy-item">
-                <div class="pi-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-                <div class="pi-text"><h4>No account required</h4><p>We never ask for your name or email. There's no sign-up system.</p></div>
-            </div>
-            <div class="privacy-item">
-                <div class="pi-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></div>
-                <div class="pi-text"><h4>Screenshots deleted within 15 minutes</h4><p>Automatically and permanently purged after your report generates.</p></div>
-            </div>
-            <div class="privacy-item">
-                <div class="pi-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
-                <div class="pi-text"><h4>Report stays on your device</h4><p>Sent directly to your browser. We keep no copy on our servers.</p></div>
-            </div>
-            <div class="privacy-item">
-                <div class="pi-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg></div>
-                <div class="pi-text"><h4>Anonymous payment</h4><p>Stripe processes your payment. We never see your card details.</p></div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA BOTTOM -->
-<section class="cta-bottom">
-    <div class="cta-bottom-eyebrow">Before your next listing</div>
-    <h2>$2. Two minutes.<br><em>Joe's honest read.</em></h2>
-    <p>Most buyers walk into inspections without the full picture. You don't have to.</p>
-    <a href="/dashboard.html">Get Joe's Read →</a>
-    <div class="cta-sub">$2 Standard · $5 Deep Dive · No account · Works worldwide</div>
-</section>
-
+<!-- FOOTER -->
 <footer>
-    <div class="footer-inner">
-        <span>© 2026 Listing Lens · The UPD8 Group Pty Ltd</span>
-        <div class="footer-links">
-            <a href="/terms.html">Terms</a>
-            <a href="/privacy.html">Privacy</a>
-        </div>
+  <div class="footer-inner">
+    <a href="/" class="footer-logo">Listing Lens.</a>
+    <div class="footer-links">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#meet-joe">Meet Joe</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/privacy.html">Privacy</a>
     </div>
+    <span class="footer-copy">© 2026 Listing Lens · The UPD8 Group Pty Ltd</span>
+  </div>
 </footer>
 
 <script>
-function toggleFaq(btn) {
-    var item = btn.closest('.faq-item');
-    var wasOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(function(el) { el.classList.remove('open'); });
-    if (!wasOpen) item.classList.add('open');
-}
-
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
 </body>
 </html>
