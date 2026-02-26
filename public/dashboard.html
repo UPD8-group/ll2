@@ -161,16 +161,18 @@
     .skel-bar+.skel-bar{margin-top:8px;}
     @keyframes shimmer{0%,100%{opacity:0.5}50%{opacity:1}}
 
-    /* Report iframe */
-    .state-report{display:none;flex:1;flex-direction:column;}
-    .report-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
-    .btn-toolbar{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border-med);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-sec);background:var(--cream);cursor:pointer;text-decoration:none;transition:all 0.15s;font-family:var(--font);}
+    /* Full-page report overlay */
+    .report-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#fff;overflow-y:auto;animation:report-in 0.3s cubic-bezier(0.22,1,0.36,1) both;}
+    .report-overlay.visible{display:block;}
+    @keyframes report-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .report-floating-bar{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(240,235,227,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+    .btn-toolbar{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1px solid var(--border-med);border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-sec);background:var(--white);cursor:pointer;text-decoration:none;transition:all 0.15s;font-family:var(--font);}
     .btn-toolbar:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-pale);}
     .btn-toolbar.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
     .btn-toolbar.primary:hover{background:#2d2926;color:#fff;}
     .btn-toolbar svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
     #report-id-tag{font-size:11px;color:var(--ink-muted);margin-left:auto;}
-    .report-frame{border:none;width:100%;flex:1;min-height:65vh;}
+    .report-body-content{padding:0;max-width:860px;margin:0 auto;padding:40px 32px 80px;}
 
     /* ── FOOTER ── */
     footer{padding:20px 32px;border-top:1px solid var(--border);}
@@ -181,14 +183,10 @@
 
     /* ── PRINT STYLES ── */
     @media print {
-      nav, .sidebar, footer, .report-toolbar { display:none !important; }
+      nav, .sidebar, footer, .report-floating-bar, .layout { display:none !important; }
+      .report-overlay { position:static !important; overflow:visible !important; animation:none !important; }
+      .report-body-content { padding:0 !important; max-width:100% !important; }
       body { background:#fff; }
-      main { display:block; }
-      .layout { display:block; padding:0; }
-      .report-panel { border:none; box-shadow:none; min-height:auto; }
-      .panel-header { border-bottom:1px solid #e5e7eb; }
-      .state-report { display:flex !important; }
-      .report-frame { min-height:100vh; height:auto; }
     }
   </style>
 </head>
@@ -328,26 +326,38 @@
         <div class="skel-section" id="sk6" style="opacity:0.2"><div class="skel-num">06 — Joe's verdict</div><div class="skel-bar l"></div><div class="skel-bar l"></div><div class="skel-bar m"></div></div>
       </div>
 
-      <!-- Report -->
-      <div id="state-report" class="state-report">
-        <div class="report-toolbar">
-          <button class="btn-toolbar primary" onclick="printReport()">
-            <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Print / Save PDF
-          </button>
-          <a id="btn-new-tab" class="btn-toolbar" target="_blank">
-            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Open in new tab
-          </a>
-          <span id="report-id-tag"></span>
+      <!-- Report panel shows "report ready" indicator -->
+      <div id="state-report-ready" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:48px;">
+        <div style="width:56px;height:56px;background:var(--green-pale);border-radius:14px;display:flex;align-items:center;justify-content:center;">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="var(--green-dark)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <iframe id="report-frame" class="report-frame" title="Listing Lens Report" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        <div style="font-family:var(--display);font-size:20px;font-weight:700;color:var(--ink);">Report ready</div>
+        <button onclick="openReportOverlay()" class="btn-empty">View full report →</button>
       </div>
 
     </section>
-
   </div>
 </main>
+
+<!-- ══ FULL PAGE REPORT OVERLAY ══ -->
+<div id="report-overlay" class="report-overlay">
+  <div class="report-floating-bar">
+    <button class="btn-toolbar" onclick="closeReportOverlay()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to dashboard
+    </button>
+    <button class="btn-toolbar primary" onclick="printReport()">
+      <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Save PDF
+    </button>
+    <a id="btn-new-tab" class="btn-toolbar" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open in new tab
+    </a>
+    <span id="report-id-tag"></span>
+  </div>
+  <div id="report-body-content" class="report-body-content"></div>
+</div>
 
 <input id="file-input" type="file" accept="image/*" multiple style="display:none" />
 
@@ -404,8 +414,9 @@ const counterLabel  = $('counter-label');
 const stepListEl    = $('step-list');
 const stateEmpty    = $('state-empty');
 const stateSkeleton = $('state-skeleton');
-const stateReport   = $('state-report');
-const reportFrame   = $('report-frame');
+const stateReportReady = $('state-report-ready');
+const reportOverlay = $('report-overlay');
+const reportBodyContent = $('report-body-content');
 const errorBar      = $('error-bar');
 const caseListEl    = $('case-list');
 const caseCountEl   = $('case-count');
@@ -571,19 +582,22 @@ function resetView() {
   stopCounter();
   sidebar.classList.remove('scanning');
   showError('');
-  stateEmpty.style.display    = 'flex';
-  stateSkeleton.style.display = 'none';
-  stateReport.style.display   = 'none';
-  reportFrame.srcdoc          = '';
-  panelTitle.textContent      = 'No scan selected yet';
-  panelScore.textContent      = '--';
-  panelScore.className        = 'panel-score';
+  stateEmpty.style.display       = 'flex';
+  stateSkeleton.style.display    = 'none';
+  stateReportReady.style.display = 'none';
+  reportOverlay.classList.remove('visible');
+  document.body.style.overflow   = '';
+  panelTitle.textContent         = 'No scan selected yet';
+  panelScore.textContent         = '--';
+  panelScore.className           = 'panel-score';
 }
 
 function beginScanAnimation() {
-  stateEmpty.style.display    = 'none';
-  stateReport.style.display   = 'none';
-  stateSkeleton.style.display = 'flex';
+  stateEmpty.style.display       = 'none';
+  stateReportReady.style.display = 'none';
+  reportOverlay.classList.remove('visible');
+  document.body.style.overflow   = '';
+  stateSkeleton.style.display    = 'flex';
   ['sk2','sk3','sk4','sk5','sk6'].forEach(id => { const el=$(id); if(el) el.style.opacity='0.2'; });
   $('sk-tag-type').textContent   = 'Vehicle';
   $('sk-tag-status').textContent = 'Reading…';
@@ -653,30 +667,46 @@ function pollStatus(jobId) {
   });
 }
 
-// ── SHOW REPORT ──
+// ── REPORT OVERLAY ──
+let currentReportHTML = '';
+
 function showReport(html, reportId, title) {
-  stateSkeleton.style.display = 'none';
-  stateEmpty.style.display    = 'none';
-  stateReport.style.display   = 'flex';
-  reportFrame.srcdoc = html;
-  // Open-in-new-tab blob
-  const blob = new Blob([html], { type:'text/html' });
-  $('btn-new-tab').href = URL.createObjectURL(blob);
-  $('report-id-tag').textContent = reportId || '';
+  currentReportHTML = html;
+  stateSkeleton.style.display    = 'none';
+  stateEmpty.style.display       = 'none';
+  stateReportReady.style.display = 'flex';
   panelTitle.textContent = title || 'Report ready';
   panelScore.textContent = '✓';
   panelScore.className   = 'panel-score green';
+  // Pre-load the overlay content
+  reportBodyContent.innerHTML = html;
+  $('report-id-tag').textContent = reportId || '';
+  // Blob URL for open-in-new-tab
+  const blob = new Blob([html], { type:'text/html' });
+  $('btn-new-tab').href = URL.createObjectURL(blob);
+  // Auto-open the overlay
+  openReportOverlay();
 }
 
-// ── PRINT ──
+function openReportOverlay() {
+  reportOverlay.classList.add('visible');
+  reportOverlay.scrollTop = 0;
+  document.body.style.overflow = 'hidden'; // prevent bg scroll
+}
+
+function closeReportOverlay() {
+  reportOverlay.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
 function printReport() {
-  // Try printing the iframe contents directly
-  try {
-    reportFrame.contentWindow.focus();
-    reportFrame.contentWindow.print();
-  } catch {
-    window.print();
-  }
+  // Temporarily show only the overlay content for printing
+  const style = document.createElement('style');
+  style.id = 'print-override';
+  style.textContent = `@media print { body > *:not(#report-overlay) { display:none !important; } #report-overlay { position:static !important; overflow:visible !important; animation:none !important; } .report-floating-bar { display:none !important; } }`;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => { const s = $('print-override'); if(s) s.remove(); }, 500);
 }
 
 // ── CASES ──
@@ -726,6 +756,7 @@ async function startReportGeneration(sessionId, paymentIntentId) {
     showError(err?.message || 'Analysis failed — please try again.');
     stateEmpty.style.display    = 'flex';
     stateSkeleton.style.display = 'none';
+    stateReportReady.style.display = 'none';
   }
 }
 
