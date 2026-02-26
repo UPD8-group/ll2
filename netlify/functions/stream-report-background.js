@@ -1,12 +1,11 @@
 /**
- * LISTING LENS — Stream Report Background Function
+ * LISTING LENS — Stream Report Background Function v3.0
  *
- * Background function that runs Claude and stores result in Blobs.
- * Returns 202 immediately (Netlify requirement for background functions).
- * Frontend polls /api/report-status for completion.
- *
- * Route: POST /.netlify/functions/stream-report-background
- * Body:  { sessionId, paymentIntentId, jobId }
+ * Changes from v2:
+ * - Single $3 tier only (300 cents). No deep-dive, no tiers.
+ * - Single prompt: fast-universal-v4.1.md for all listings
+ * - Payment check updated to accept 300 cents
+ * - Tier/category routing removed
  */
 
 const Anthropic    = require('@anthropic-ai/sdk');
@@ -38,7 +37,7 @@ async function verifyPayment(paymentIntentId) {
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
         if (intent.status !== 'succeeded') return { valid: false, reason: 'Payment not succeeded' };
-        if (![200, 500, 1000].includes(intent.amount)) return { valid: false, reason: 'Invalid amount' };
+        if (intent.amount !== 300) return { valid: false, reason: 'Invalid amount' };
         if (intent.currency !== 'aud') return { valid: false, reason: 'Wrong currency' };
         if (intent.metadata && intent.metadata.report_generated === 'true') return { valid: false, reason: 'Already used' };
         await stripe.paymentIntents.update(paymentIntentId, {
@@ -51,9 +50,6 @@ async function verifyPayment(paymentIntentId) {
 }
 
 exports.handler = async (event) => {
-    // Background functions MUST return 202 immediately
-    // All work happens after this return (Netlify keeps the function running)
-
     const store = blobStore();
     let jobId = null;
 
@@ -105,51 +101,16 @@ exports.handler = async (event) => {
             return { statusCode: 202 };
         }
 
-        // Determine tier and category from session metadata
-        let tier = 'standard';
-        let category = '';
-        try {
-            const qsMeta = await store.get('qs/' + sessionId, { type: 'json' });
-            if (qsMeta) {
-                if (qsMeta.tier) tier = qsMeta.tier;
-                if (qsMeta.category) category = qsMeta.category.toLowerCase();
-            }
-        } catch (e) {
-            console.log('Job ' + jobId + ': session metadata unavailable, using defaults');
-        }
-
-        const isProperty = category && (
-            category.includes('property') || category.includes('house') || category.includes('apartment') ||
-            category.includes('unit') || category.includes('townhouse') || category.includes('real estate') ||
-            category.includes('land') || category.includes('acreage') || category.includes('rural') ||
-            category.includes('commercial') || category.includes('office') || category.includes('warehouse')
-        );
-
-        let promptFile;
-        if (isProperty) {
-            promptFile = 'realestate-v1.md';
-            console.log('Job ' + jobId + ': property (' + tier + ') — using realestate prompt');
-        } else if (tier === 'deep-dive') {
-            promptFile = 'deep-dive-v1.md';
-            console.log('Job ' + jobId + ': deep-dive tier — using deep-dive prompt');
-        } else {
-            promptFile = 'fast-universal-v4.1.md';
-            console.log('Job ' + jobId + ': standard tier — using v4.1 prompt');
-        }
-
-        // Load prompt with fallback chain
-        let systemPrompt = loadPrompt(promptFile);
+        // Load prompt — single file for all listings
+        let systemPrompt = loadPrompt('fast-universal-v4.1.md');
         if (!systemPrompt) {
-            systemPrompt = loadPrompt('fast-universal-v4.1.md') || loadPrompt('fast-universal-v4.md');
-        }
-        if (!systemPrompt) {
-            await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing' });
+            await store.setJSON('job/' + jobId, { status: 'error', error: 'Prompt file missing — check prompts/fast-universal-v4.1.md' });
             return { statusCode: 202 };
         }
 
         const reportId = 'LL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
         const today    = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
-        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\nPrompt: ' + promptFile + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
+        systemPrompt  += '\n\n---\nReport ID: ' + reportId + '\nDate: ' + today + '\nScreenshots provided: ' + screenshots.length + '\n\nOutput ONLY valid HTML starting with <!DOCTYPE html>. No markdown, no code fences.';
 
         console.log('Job ' + jobId + ': calling Claude, ' + screenshots.length + ' screenshot(s)');
 
@@ -157,6 +118,7 @@ exports.handler = async (event) => {
         const response = await client.messages.create({
             model:      'claude-sonnet-4-6',
             max_tokens: 6000,
+            temperature: 0.3,
             system:     systemPrompt,
             messages:   [{
                 role: 'user',
@@ -164,7 +126,7 @@ exports.handler = async (event) => {
                     ...screenshots.map(function(s) {
                         return { type: 'image', source: { type: 'base64', media_type: s.mimeType, data: s.base64 } };
                     }),
-                    { type: 'text', text: 'Analyse this listing and generate the complete Listing Lens buyer intelligence report as standalone HTML.' }
+                    { type: 'text', text: 'Analyse this listing. Write the report as Joe — the buyer\'s mechanic. Lead with any recalls or legal proceedings. Do not describe the listing back to the buyer.' }
                 ]
             }]
         });
