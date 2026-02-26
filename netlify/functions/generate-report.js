@@ -1,24 +1,41 @@
+/**
+ * LISTING LENS — Generate Report (Session Validator)
+ *
+ * Validates session exists, returns a jobId.
+ * The BROWSER then calls generate-report-background directly.
+ * No server-to-server function calls — that was the bug.
+ */
+
+const crypto = require('crypto');
 const { getStore } = require('@netlify/blobs');
+const SITE_ID = 'b95526e0-71f5-445b-97fb-eac488509a38';
 
 exports.handler = async (event) => {
-    // 1. Establish Forensic Persona
-    const systemInstruction = `
-    ROLE: Lead Forensic Analyst for Listing Lens.
-    MISSION: Deconstruct [CATEGORY] listings into neutral intelligence.
-    STRICT DIRECTIVE: Never tell the user to "buy" or "avoid." 
-    Focus on "The Void" (what is missing) and "The Discrepancy" (text vs photo).
-    
-    REPORT FORMAT:
-    - TRANSPARENCY RATING: 🟢/🟡/🔴 (Based on data completeness)
-    - FORENSIC OBSERVED: Hard data points found.
-    - STRATEGIC OMISSIONS: What the seller didn't show.
-    - NEGOTIATION LEVERAGE: Fact-based pressure points.
-    - THE CLOSER SCRIPT: 3 data-extraction questions.
-    `;
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
+    };
+    if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+    if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
-    // 2. Process logic (Stripped to core OCR/LLM pipe)
-    // - Retrieve sessionId from body
-    // - Fetch screenshots from Blobs
-    // - Call LLM with systemInstruction + user image data
-    // - Stream response back to UI
+    try {
+        const body = JSON.parse(event.body || '{}');
+        const sessionId = body.sessionId;
+        if (!sessionId) return { statusCode: 400, headers, body: JSON.stringify({ error: 'sessionId required' }) };
+
+        const store = getStore({ name: 'listing-lens-sessions', siteID: SITE_ID, token: process.env.NETLIFY_TOKEN });
+        let meta;
+        try { meta = await store.get(sessionId + '/meta', { type: 'json' }); } catch (_) { meta = null; }
+
+        if (!meta) return { statusCode: 410, headers, body: JSON.stringify({ error: 'Session expired', message: 'Please re-upload your screenshots.' }) };
+
+        const jobId = crypto.randomUUID().replace(/-/g, '').substring(0, 16);
+        console.log('Session valid. jobId:', jobId);
+        return { statusCode: 200, headers, body: JSON.stringify({ jobId }) };
+
+    } catch (err) {
+        console.error('Error:', err.message);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    }
 };
