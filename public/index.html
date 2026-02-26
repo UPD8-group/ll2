@@ -11,23 +11,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #F8F8F6;
-            --white: #FFFFFF;
-            --ink: #0C0F1A;
-            --ink-sec: #3D4459;
-            --ink-muted: #8A91A8;
-            --border: #E0E3ED;
-            --blue: #1B3A7A;
-            --blue-mid: #2451A8;
+            --bg: #060912;
+            --white: #0c1428;
+            --ink: #e8eaf0;
+            --ink-sec: #9ca3af;
+            --ink-muted: #5a6380;
+            --border: rgba(255,255,255,0.09);
+            --blue: #7BA7FF;
+            --blue-mid: #5585f5;
             --blue-light: #3B6DE8;
-            --blue-bg: #EEF3FF;
+            --blue-bg: rgba(59,109,232,0.12);
             --blue-glow: rgba(59,109,232,0.15);
-            --green: #16803C;
-            --green-bg: #F0FDF4;
-            --amber: #B45309;
-            --amber-bg: #FFFBEB;
-            --red: #DC2626;
-            --red-bg: #FEF2F2;
+            --green: #4ade80;
+            --green-bg: rgba(74,222,128,0.1);
+            --amber: #fbbf24;
+            --amber-bg: rgba(251,191,36,0.1);
+            --red: #f87171;
+            --red-bg: rgba(248,113,113,0.1);
             --radius: 12px;
             --font: 'Inter', -apple-system, sans-serif;
             --font-display: 'Space Grotesk', sans-serif;
@@ -160,7 +160,7 @@
         .hero-stat-label { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 2px; }
 
         /* ── JOE SECTION ── */
-        .joe-section { background: var(--ink); padding: 88px 32px; }
+        .joe-section { background: #030609; padding: 88px 32px; }
         .joe-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
         @media (max-width: 720px) { .joe-inner { grid-template-columns: 1fr; gap: 48px; } }
 
@@ -239,7 +239,7 @@
         .joe-score-label { font-size: 12px; color: rgba(255,255,255,0.4); text-align: right; }
 
         /* ── PERSONAS (Coming Soon) ── */
-        .personas-section { background: var(--bg); padding: 80px 32px; }
+        .personas-section { background: #080c1c; padding: 80px 32px; }
         .personas-inner { max-width: 960px; margin: 0 auto; }
         .section-label {
             font-family: var(--font-display);
@@ -250,7 +250,7 @@
             font-family: var(--font-display);
             font-size: clamp(28px, 4vw, 44px);
             font-weight: 800; letter-spacing: -1px;
-            line-height: 1.1; margin-bottom: 16px; color: var(--ink);
+            line-height: 1.1; margin-bottom: 16px; color: #e8eaf0;
         }
         .section-sub { font-size: 17px; color: var(--ink-sec); max-width: 560px; margin-bottom: 48px; line-height: 1.65; }
 
@@ -259,7 +259,7 @@
         @media (max-width: 480px) { .personas-grid { grid-template-columns: 1fr; } }
 
         .persona-card {
-            background: var(--white); border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
             border-radius: var(--radius); padding: 24px 20px;
             position: relative; overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -272,19 +272,19 @@
             font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
             padding: 2px 8px; border-radius: 4px;
         }
-        .persona-badge.live { background: #dcfce7; color: #166534; }
-        .persona-badge.coming { background: #f1f5f9; color: #64748b; }
+        .persona-badge.live { background: rgba(74,222,128,0.15); color: #4ade80; }
+        .persona-badge.coming { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.35); }
         .persona-emoji { font-size: 30px; margin-bottom: 14px; display: block; }
         .persona-name {
             font-family: var(--font-display); font-size: 17px; font-weight: 800;
-            color: var(--ink); margin-bottom: 6px;
+            color: #e8eaf0; margin-bottom: 6px;
         }
         .persona-role { font-size: 12px; font-weight: 600; color: var(--blue-light); margin-bottom: 10px; }
         .persona-desc { font-size: 13px; color: var(--ink-sec); line-height: 1.6; }
 
         /* ── PROOF STRIP ── */
         .proof-strip {
-            background: var(--ink); border-top: 1px solid rgba(255,255,255,0.07);
+            background: #030609; border-top: 1px solid rgba(255,255,255,0.07);
             border-bottom: 1px solid rgba(255,255,255,0.07); padding: 18px 32px;
         }
         .proof-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 36px; flex-wrap: wrap; }
@@ -299,25 +299,25 @@
         @media (max-width: 700px) { .steps { grid-template-columns: 1fr; gap: 24px; } }
         .step-num {
             width: 38px; height: 38px;
-            background: var(--blue-bg); color: var(--blue-light);
+            background: rgba(59,109,232,0.12); color: var(--blue-light);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-family: var(--font-display); font-weight: 800; font-size: 15px;
-            margin-bottom: 18px; border: 1px solid rgba(59,109,232,0.2);
+            margin-bottom: 18px; border: 1px solid rgba(59,109,232,0.25);
         }
-        .step h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; color: var(--ink); }
+        .step h3 { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 10px; color: #e8eaf0; }
         .step p { font-size: 15px; color: var(--ink-sec); line-height: 1.7; }
 
         /* ── WHAT YOU GET ── */
         .what-wrap { max-width: 960px; margin: 72px auto 0; padding: 0 32px; }
         .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         @media (max-width: 680px) { .what-grid { grid-template-columns: 1fr; } }
-        .what-item { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
+        .what-item { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; }
         .what-icon { font-size: 22px; margin-bottom: 10px; }
-        .what-item h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+        .what-item h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8eaf0; }
         .what-item p { font-size: 14px; color: var(--ink-sec); line-height: 1.6; }
-        .what-item.featured { background: var(--blue-bg); border-color: rgba(59,109,232,0.2); }
-        .what-item.featured h3 { color: var(--blue); }
-        .what-item.featured p { color: #2451A8; }
+        .what-item.featured { background: rgba(59,109,232,0.12); border-color: rgba(59,109,232,0.2); }
+        .what-item.featured h3 { color: #7BA7FF; }
+        .what-item.featured p { color: #93c5fd; }
 
         /* ── FLIP CARD ── */
         .card-wrap { max-width: 540px; margin: 56px auto 0; padding: 0 32px; }
@@ -328,14 +328,14 @@
         .flip-card-front, .flip-card-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
         .flip-card-back { position: absolute; top: 0; left: 0; right: 0; transform: rotateY(180deg); }
 
-        .mock { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(15,23,42,0.08); overflow: hidden; }
-        .mock-property-img { width: calc(100% + 48px); height: 140px; margin: -24px -24px 20px -24px; display: block; background: linear-gradient(135deg, #1B3A7A 0%, #2451A8 40%, #3B6DE8 100%); position: relative; overflow: hidden; }
+        .mock { background: #0c1428; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(15,23,42,0.08); overflow: hidden; }
+        .mock-property-img { width: calc(100% + 48px); height: 140px; margin: -24px -24px 20px -24px; display: block; background: linear-gradient(135deg, #030609 0%, #0c1428 40%, #1B3A7A 100%); position: relative; overflow: hidden; }
         .mock-property-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.3) 100%); }
         .mock-property-badge { position: absolute; top: 12px; left: 12px; z-index: 1; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; background: rgba(59,109,232,0.9); border: 1px solid rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 4px; }
         .mock-property-addr { position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 1; }
         .mock-property-addr .addr-main { font-size: 14px; font-weight: 800; color: #fff; line-height: 1.2; }
         .mock-property-addr .addr-sub { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
-        .mock-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+        .mock-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.15); }
         .mock-brand { font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
         .mock-id { font-size: 10px; color: var(--ink-muted); }
         .mock-score { display: flex; align-items: center; gap: 16px; background: var(--ink); color: #fff; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
@@ -345,18 +345,18 @@
         .mock-verdict { font-size: 12px; color: #94a3b8; line-height: 1.4; }
         .mock-disc-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 4px; margin-bottom: 10px; background: #FFFBEB; color: #B45309; border: 1px solid rgba(180,83,9,0.2); }
         .mock-flag { padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid; font-size: 12px; font-weight: 600; line-height: 1.35; }
-        .mock-flag.r { background: var(--red-bg); border-color: var(--red); color: #991b1b; }
-        .mock-flag.a { background: var(--amber-bg); border-color: var(--amber); color: #92400e; }
-        .mock-flag.g { background: var(--green-bg); border-color: var(--green); color: #166534; }
-        .flip-hint { text-align: center; font-size: 12px; font-weight: 600; color: var(--blue-light); margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+        .mock-flag.r { background: rgba(248,113,113,0.1); border-color: #f87171; color: #fca5a5; }
+        .mock-flag.a { background: rgba(251,191,36,0.1); border-color: #fbbf24; color: #fde68a; }
+        .mock-flag.g { background: rgba(74,222,128,0.1); border-color: #4ade80; color: #86efac; }
+        .flip-hint { text-align: center; font-size: 12px; font-weight: 600; color: var(--blue-light); margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
         .mock-section { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin: 12px 0 7px; }
-        .mock-cost { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid #f1f5f9; color: var(--ink-sec); }
-        .mock-cost span:last-child { font-weight: 700; color: var(--ink); }
+        .mock-cost { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.06); color: #9ca3af; }
+        .mock-cost span:last-child { font-weight: 700; color: #e8eaf0; }
         .mock-cost.total { border-top: 2px solid var(--ink); border-bottom: none; padding-top: 7px; }
-        .mock-cost.total span { font-weight: 800; }
-        .mock-q { font-size: 12px; color: var(--ink-sec); padding: 5px 10px; background: var(--bg); border-left: 2px solid var(--blue-light); border-radius: 3px; margin-bottom: 5px; line-height: 1.45; }
+        .mock-cost.total span { font-weight: 800; color: #e8eaf0; }
+        .mock-q { font-size: 12px; color: #9ca3af; padding: 5px 10px; background: rgba(255,255,255,0.04); border-left: 2px solid var(--blue-light); border-radius: 3px; margin-bottom: 5px; line-height: 1.45; }
         .mock-scores-row { display: flex; gap: 5px; margin-bottom: 2px; }
-        .mock-pill { flex: 1; text-align: center; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 3px; }
+        .mock-pill { flex: 1; text-align: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 3px; }
         .mock-pill-num { display: block; font-family: var(--font-display); font-size: 15px; font-weight: 800; }
         .mock-pill-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); }
         .back-scroll { max-height: 540px; overflow-y: auto; scrollbar-width: none; }
@@ -364,22 +364,22 @@
         .mock-checklist { display: flex; flex-direction: column; gap: 4px; }
         .mock-check { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--ink-sec); }
         .mock-check::before { content: '☐'; font-size: 13px; color: var(--blue-light); flex-shrink: 0; }
-        .mock-closer { background: var(--blue-bg); border-left: 3px solid var(--blue-light); padding: 8px 10px; border-radius: 0 5px 5px 0; margin-bottom: 5px; }
+        .mock-closer { background: rgba(59,109,232,0.12); border-left: 3px solid var(--blue-light); padding: 8px 10px; border-radius: 0 5px 5px 0; margin-bottom: 5px; }
         .mock-closer-topic { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-light); margin-bottom: 3px; }
-        .mock-closer-q { font-size: 11px; font-style: italic; color: var(--blue); line-height: 1.4; }
+        .mock-closer-q { font-size: 11px; font-style: italic; color: #93c5fd; line-height: 1.4; }
 
         /* ── TRUST ── */
         .trust { max-width: 900px; margin: 56px auto 0; padding: 0 32px 80px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-        .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-sec); font-weight: 500; padding: 8px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 100px; }
+        .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 500; padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 100px; }
         .trust-item svg { width: 14px; height: 14px; color: var(--blue-light); flex-shrink: 0; }
 
         /* ── FAQ ── */
-        .faq { background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 72px 32px; }
+        .faq { background: #080c1c; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 72px 32px; }
         .faq-inner { max-width: 680px; margin: 0 auto; }
         .faq-list { display: flex; flex-direction: column; gap: 8px; }
-        .faq-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-        .faq-q { width: 100%; text-align: left; background: var(--white); border: none; padding: 20px 22px; font-family: var(--font); font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; line-height: 1.4; }
-        .faq-q:hover { background: var(--bg); }
+        .faq-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: rgba(255,255,255,0.03); }
+        .faq-q { width: 100%; text-align: left; background: transparent; border: none; padding: 20px 22px; font-family: var(--font); font-size: 15px; font-weight: 700; color: #e8eaf0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; line-height: 1.4; }
+        .faq-q:hover { background: rgba(255,255,255,0.04); }
         .faq-arrow { width: 18px; height: 18px; flex-shrink: 0; color: var(--blue-light); transition: transform 0.2s; }
         .faq-item.open .faq-arrow { transform: rotate(180deg); }
         .faq-a { display: none; padding: 16px 22px 20px; font-size: 14px; color: var(--ink-sec); line-height: 1.75; border-top: 1px solid var(--border); }
@@ -390,12 +390,12 @@
         .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
         @media (max-width: 700px) { .privacy-grid { grid-template-columns: 1fr; } }
         .privacy-intro { font-size: 16px; color: var(--ink-sec); line-height: 1.75; margin-bottom: 20px; }
-        .privacy-callout { background: var(--blue-bg); border: 1px solid rgba(59,109,232,0.15); border-radius: var(--radius); padding: 18px 22px; font-size: 14px; color: var(--blue); line-height: 1.65; }
+        .privacy-callout { background: rgba(59,109,232,0.1); border: 1px solid rgba(59,109,232,0.2); border-radius: var(--radius); padding: 18px 22px; font-size: 14px; color: #93c5fd; line-height: 1.65; }
         .privacy-items { display: flex; flex-direction: column; gap: 12px; }
-        .privacy-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; }
-        .pi-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--blue-bg); color: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .privacy-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; }
+        .pi-icon { width: 34px; height: 34px; border-radius: 8px; background: rgba(59,109,232,0.12); color: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .pi-icon svg { width: 16px; height: 16px; }
-        .pi-text h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; color: var(--ink); }
+        .pi-text h4 { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 3px; color: #e8eaf0; }
         .pi-text p { font-size: 13px; color: var(--ink-sec); line-height: 1.5; }
 
         /* ── CTA BOTTOM ── */
@@ -420,7 +420,7 @@
         .cta-sub { margin-top: 14px; font-size: 13px; color: rgba(255,255,255,0.25); position: relative; }
 
         /* ── FOOTER ── */
-        footer { padding: 28px 32px; border-top: 1px solid var(--border); background: var(--bg); }
+        footer { padding: 28px 32px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.3); }
         .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-muted); }
         .footer-links { display: flex; gap: 20px; }
         .footer-links a { color: var(--ink-muted); text-decoration: none; }
@@ -454,12 +454,12 @@
         </div>
 
         <h1>
-            <span class="name">Joe</span> doesn't care<br>about your feelings.
-            <span class="sub">He cares about your money.</span>
+            <span class="name">Meet Joe</span> he doesn't care<br>about your feelings.
+            <span class="sub">He cares about saving you money.</span>
         </h1>
 
-        <p class="hero-desc">Joe is a pissed-off mechanic who reads every listing like it's hiding something — because most of them are. Upload a screenshot. Get his honest read.</p>
-        <p class="hero-callout">A buyer's advocate costs <strong>$3,000–$5,000.</strong> Joe costs <strong>$2.</strong></p>
+        <p class="hero-desc">Joe is a pissed-off mechanic who reads every listing like it's hiding something. Upload a screenshot. Get his honest read.</p>
+        <p class="hero-callout">A buyer's advocate costs <strong>$3,000–$5,000.</strong> Joe costs <strong>less than a coffee.</strong></p>
 
         <div class="hero-cta-wrap">
             <a href="/dashboard.html" class="hero-cta">Get Joe's Read →</a>
@@ -619,7 +619,7 @@
                         <span class="mock-brand">Listing Lens</span>
                         <span class="mock-id">LL-9P4K1 · 26 Feb 2026</span>
                     </div>
-                    <div class="mock-disc-badge" style="background:#FEF2F2;color:#DC2626;border-color:rgba(220,38,38,0.2);">🔴 SIGNIFICANT concerns</div>
+                    <div class="mock-disc-badge" style="background:rgba(248,113,113,0.1);color:#f87171;border-color:rgba(248,113,113,0.2);">🔴 SIGNIFICANT concerns</div>
                     <div class="mock-score">
                         <div class="mock-num">41</div>
                         <div class="mock-verdict-wrap">
