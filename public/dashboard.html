@@ -43,7 +43,17 @@
     /* ── LAYOUT ── */
     main{flex:1;}
     .layout{max-width:1160px;margin:0 auto;padding:24px 32px;display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;align-items:start;}
-    @media(max-width:900px){.layout{grid-template-columns:1fr;} .sidebar{position:static;}}
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{position:static;}
+      /* When report is ready, flip order: report on top, sidebar below */
+      .layout.report-ready .report-panel{order:-1;}
+      .layout.report-ready .sidebar{order:2;}
+      /* Collapse sidebar to just the scan button + session list when report showing */
+      .layout.report-ready .scan-card .progress-block,
+      .layout.report-ready .scan-card .price-row,
+      .layout.report-ready .scan-card .upload-hint{display:none;}
+    }
     @media(max-width:600px){.layout{padding:16px;} .report-panel{min-height:60vh;} .report-content{padding:20px 16px 36px;} .panel-header{padding:14px 16px;} .panel-title{font-size:16px;} .counter-ring-svg{width:80px;height:80px;} .counter-number{font-size:48px;}}
 
     /* ── SIDEBAR ── */
@@ -194,7 +204,7 @@
 </nav>
 
 <main>
-  <div class="layout">
+  <div class="layout" id="layout">
 
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar" id="sidebar">
@@ -352,6 +362,7 @@ let counterRafId  = null;
 let stepTimers    = [];
 
 const $ = id => document.getElementById(id);
+const layoutEl       = $('layout');
 const sidebar       = $('sidebar');
 const counterNum    = $('counter-num');
 const counterRing   = $('counter-ring');
@@ -526,6 +537,7 @@ function showError(msg) {
 function resetView() {
   stopCounter();
   sidebar.classList.remove('scanning');
+  layoutEl.classList.remove('report-ready');
   showError('');
   stateEmpty.style.display    = 'flex';
   stateSkeleton.style.display = 'none';
@@ -537,6 +549,7 @@ function resetView() {
 }
 
 function beginScanAnimation() {
+  layoutEl.classList.remove('report-ready');
   stateEmpty.style.display    = 'none';
   stateReport.style.display   = 'none';
   stateSkeleton.style.display = 'flex';
@@ -614,6 +627,13 @@ function showReport(html, reportId, title) {
   panelTitle.textContent = title || 'Report ready';
   panelScore.textContent = '✓';
   panelScore.className   = 'panel-score green';
+  // Mobile: reorder so report is on top, then scroll to it
+  layoutEl.classList.add('report-ready');
+  if (window.innerWidth <= 900) {
+    requestAnimationFrame(() => {
+      $('report-panel').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
 }
 
 function printReport() {
