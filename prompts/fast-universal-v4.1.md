@@ -43,9 +43,9 @@ REPORT STRUCTURE — FOUR SECTIONS ONLY:
 SECTION 1: ALERTS — RECALLS, LEGAL & SAFETY
 - Red card (background #fef2f2, border rgba(220,38,38,0.2)) if alerts exist
 - Green card (background #e8f7f0) if clean
-- Check for: active ACCC safety recalls, Federal Court proceedings, Takata or industry safety campaigns, known TSBs
+- Check for: active ACCC safety recalls, Federal Court proceedings, known industry safety campaigns, relevant TSBs
 - FOR LDV T60 (any year, any variant): ALWAYS include — "The ACCC filed Federal Court proceedings against LDV Automotive Australia on 23 April 2025. The ACCC alleges the T60 had a propensity to rust or corrode within 5 years of manufacture. Over 5,000 owner complaints on record between 2018–2024. Proceedings are active. Verify current status at accc.gov.au before purchase."
-- If nothing found: one line "No active recalls or legal proceedings found for this make, model and year."
+- If nothing found: green card, one line — "No active recalls or legal proceedings found for this make, model and year." Do NOT list recall categories that are structurally irrelevant to the vehicle type. For example: do not mention airbag recalls for trailers, caravans, or boats; do not mention powertrain recalls for unpowered trailers; do not mention engine TSBs for electric vehicles. The green card should be brief and confident — not an inventory of things that don't apply.
 
 SECTION 2: THE REAL STORY
 - White card
