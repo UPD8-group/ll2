@@ -214,6 +214,12 @@
 
         <!-- PROGRESS (shown while scanning) -->
         <div class="progress-block">
+          <div id="upload-confirm" style="display:none;text-align:center;margin-bottom:12px;">
+            <span style="display:inline-flex;align-items:center;gap:6px;background:var(--green-pale);border:1px solid var(--green-border);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--green-dark);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="upload-count-text">1 screenshot uploaded</span>
+            </span>
+          </div>
           <div class="counter-wrap">
             <svg class="counter-ring-svg" width="100" height="100" viewBox="0 0 100 100">
               <circle class="counter-track" cx="50" cy="50" r="45"/>
@@ -351,6 +357,7 @@ const SKEL_UNLOCK = { 1:"sk2", 2:"sk3", 3:"sk4", 4:"sk5", 5:"sk6" };
 let appConfig     = { betaMode: true, stripePk: '' };
 let stripe        = null, cardElement = null;
 let pendingSessionId = null;
+let pendingFileCount = 0;
 let cases = [], currentCaseId = null, caseCounter = 1;
 let reportDone    = false;   // true once backend returns
 let reportPayload = null;    // holds job result until counter reaches 100
@@ -517,7 +524,7 @@ async function handlePayment() {
     const { error, paymentIntent } = await stripe.confirmCardPayment(payment.clientSecret, { payment_method:{ card: cardElement } });
     if (error) throw new Error(error.message);
     $('payment-wrap').style.display = 'none';
-    beginScanAnimation();
+    beginScanAnimation(pendingFileCount);
     await startReportGeneration(pendingSessionId, paymentIntent.id);
   } catch(e) {
     $('pay-btn').disabled = false;
@@ -538,22 +545,31 @@ function resetView() {
   stopCounter();
   sidebar.classList.remove('scanning');
   layoutEl.classList.remove('report-ready');
+  $('upload-confirm').style.display = 'none';
   showError('');
   stateEmpty.style.display    = 'flex';
   stateSkeleton.style.display = 'none';
   stateReport.style.display   = 'none';
   reportContent.innerHTML     = '';
   panelTitle.textContent      = 'No scan selected yet';
+  document.title              = 'Listing Lens — Analyse a listing';
   panelScore.textContent         = '--';
   panelScore.className           = 'panel-score';
 }
 
-function beginScanAnimation() {
+function beginScanAnimation(fileCount) {
   layoutEl.classList.remove('report-ready');
   stateEmpty.style.display    = 'none';
   stateReport.style.display   = 'none';
   stateSkeleton.style.display = 'flex';
   ['sk2','sk3','sk4','sk5','sk6'].forEach(id => { const el=$(id); if(el) el.style.opacity='0.2'; });
+  // Show upload confirmation
+  if (fileCount) {
+    $('upload-count-text').textContent = fileCount === 1 ? '1 screenshot uploaded' : fileCount + ' screenshots uploaded';
+    $('upload-confirm').style.display = 'block';
+  } else {
+    $('upload-confirm').style.display = 'none';
+  }
   // skeleton groups reset on each new scan
   sidebar.classList.add('scanning');
   startCounter();
@@ -621,14 +637,21 @@ function showReport(html, reportId, title) {
   stateReport.style.display   = 'flex';
   reportContent.innerHTML     = html;
   reportContent.scrollTop     = 0;
+  // Extract vehicle name from report HTML for page title + PDF filename
+  const firstHeading = reportContent.querySelector('h1, h2');
+  const vehicleName = firstHeading ? firstHeading.textContent.trim() : '';
+  if (vehicleName) {
+    document.title = 'Listing Lens — ' + vehicleName;
+  }
   $('report-id-tag').textContent = reportId || '';
   const blob = new Blob([html], { type:'text/html' });
   $('btn-new-tab').href = URL.createObjectURL(blob);
-  panelTitle.textContent = title || 'Report ready';
+  panelTitle.textContent = vehicleName || title || 'Report ready';
   panelScore.textContent = '✓';
   panelScore.className   = 'panel-score green';
   // Mobile: reorder so report is on top, then scroll to it
   layoutEl.classList.add('report-ready');
+  $('upload-confirm').style.display = 'none';
   if (window.innerWidth <= 900) {
     requestAnimationFrame(() => {
       $('report-panel').scrollIntoView({ behavior:'smooth', block:'start' });
@@ -669,9 +692,14 @@ async function startReportGeneration(sessionId, paymentIntentId) {
       stopCounter();
       sidebar.classList.remove('scanning');
       const now = new Date();
+      // Extract vehicle name from report HTML for the session list
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = job.html;
+      const heading = tempDiv.querySelector('h1, h2');
+      const vName = heading ? heading.textContent.trim() : '';
       const nc = {
         id: `case-${caseCounter++}`,
-        title: job.reportId || 'Report',
+        title: vName || job.reportId || 'Report',
         reportId: job.reportId,
         html: job.html,
         shortTime: now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
@@ -679,7 +707,7 @@ async function startReportGeneration(sessionId, paymentIntentId) {
       cases.unshift(nc);
       currentCaseId = nc.id;
       renderCases();
-      showReport(job.html, job.reportId, job.reportId || 'Report ready');
+      showReport(job.html, job.reportId, vName || job.reportId || 'Report ready');
     });
   } catch(err) {
     stopCounter();
@@ -695,7 +723,8 @@ async function startReportGeneration(sessionId, paymentIntentId) {
 async function handleScan(files) {
   if (!files || !files.length) return;
   showError('');
-  beginScanAnimation();
+  pendingFileCount = Math.min(files.length, 4);
+  beginScanAnimation(pendingFileCount);
   $('btn-scan').disabled = true;
   try {
     const { sessionId } = await uploadFiles(files);
