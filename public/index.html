@@ -42,38 +42,28 @@
 
     /* HERO */
     .hero-outer{background:var(--cream);overflow:hidden;}
-    .hero-wrap{max-width:1120px;margin:0 auto;padding:0 36px 72px;position:relative;min-height:560px;display:flex;align-items:flex-end;}
-    .hero-blob{position:absolute;top:-20px;right:50px;width:500px;height:500px;background:var(--blob);border-radius:50%;z-index:0;animation:blob-float 6s ease-in-out infinite;}
-    @keyframes blob-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-14px) scale(1.02)}}
-    .hero-joe{position:absolute;top:-64px;right:36px;width:420px;height:530px;z-index:2;animation:joe-enter 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s both;}
-    @keyframes joe-enter{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-    .hero-joe img{width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:24px;box-shadow:var(--shadow-lg);filter:saturate(0.88) contrast(1.04);}
-    .joe-overlay-card{position:absolute;bottom:20px;left:-24px;background:rgba(255,255,255,0.93);backdrop-filter:blur(10px);border-radius:14px;padding:14px 16px;width:214px;border:1px solid rgba(255,255,255,0.9);box-shadow:var(--shadow-md);animation:card-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.65s both;}
-    @keyframes card-enter{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
-    .joe-overlay-label{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px;}
-    .joe-overlay-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--ink-sec);line-height:1.4;margin-bottom:6px;}
-    .joe-overlay-item:last-child{margin-bottom:0;}
-    .joe-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:3px;}
-    .hero-content{position:relative;z-index:3;max-width:540px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.05s both;}
+    .hero-wrap{max-width:760px;margin:0 auto;padding:64px 36px 72px;text-align:center;}
+    .hero-joe-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:28px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.05s both;}
+    .hero-joe-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid var(--white);box-shadow:var(--shadow-md);filter:saturate(0.88) contrast(1.04);flex-shrink:0;}
+    .hero-joe-intro{text-align:left;}
+    .hero-joe-name{font-family:var(--display);font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
+    .hero-joe-role{font-size:13px;color:var(--ink-sec);line-height:1.4;}
     @keyframes hero-text-enter{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-    .hero-persona-tag{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border-med);border-radius:100px;padding:5px 12px 5px 8px;font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-sec);margin-bottom:22px;}
-    .hero-persona-dot{width:8px;height:8px;border-radius:50%;background:var(--green);}
-    .hero-h1{font-family:var(--display);font-size:clamp(44px,6vw,74px);font-weight:800;line-height:1.04;letter-spacing:-2px;color:var(--ink);margin-bottom:20px;}
+    .hero-h1{font-family:var(--display);font-size:clamp(36px,5.5vw,62px);font-weight:800;line-height:1.08;letter-spacing:-2px;color:var(--ink);margin-bottom:24px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both;}
     .hero-h1 em{font-style:normal;color:var(--green-dark);}
-    .hero-sub{font-size:17px;color:var(--ink-sec);line-height:1.7;max-width:400px;margin-bottom:36px;}
-    .hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+    .hero-sub{font-size:17px;color:var(--ink-sec);line-height:1.7;max-width:560px;margin:0 auto 20px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.25s both;}
+    .hero-what{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:32px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.35s both;}
+    .hero-pill{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border-med);border-radius:100px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--ink-sec);}
+    .hero-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;}
+    .hero-actions{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.45s both;}
     .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-family:var(--font);font-size:15px;font-weight:600;padding:14px 28px;border-radius:100px;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 14px rgba(26,23,20,0.2);}
     .btn-hero-primary:hover{background:#2d2926;transform:translateY(-2px);box-shadow:0 8px 20px rgba(26,23,20,0.26);}
     .btn-hero-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--ink-sec);font-family:var(--font);font-size:15px;font-weight:500;padding:14px 22px;border-radius:100px;text-decoration:none;border:1.5px solid var(--border-med);transition:all 0.2s;}
     .btn-hero-secondary:hover{border-color:var(--ink);color:var(--ink);}
-    .hero-price-note{font-size:12px;color:var(--ink-muted);margin-top:14px;display:flex;align-items:center;gap:6px;}
+    .hero-price-note{font-size:12px;color:var(--ink-muted);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:6px;animation:hero-text-enter 0.8s cubic-bezier(0.22,1,0.36,1) 0.5s both;}
     .hero-price-note span{background:var(--green-pale);color:var(--green-dark);font-weight:700;padding:2px 8px;border-radius:5px;font-size:11px;}
     @media(max-width:860px){
-      .hero-wrap{flex-direction:column;min-height:auto;padding-bottom:0;padding-top:36px;}
-      .hero-blob{display:none;}
-      .hero-joe{position:relative;top:auto;right:auto;width:100%;height:300px;margin-top:32px;}
-      .joe-overlay-card{display:none;}
-      .hero-content{max-width:100%;}
+      .hero-wrap{padding:48px 24px 56px;}
     }
 
     /* PROOF TICKER */
@@ -190,27 +180,26 @@
 <!-- HERO -->
 <div class="hero-outer">
   <div class="hero-wrap">
-    <div class="hero-blob"></div>
-    <div class="hero-joe">
-      <img src="https://listinglens.app/images/meetjoe.jpg" alt="Joe — Listing Lens analyst" />
-      <div class="joe-overlay-card">
-        <div class="joe-overlay-label">What Joe checks</div>
-        <div class="joe-overlay-item"><span class="joe-dot"></span>Decodes listing fluff into reality</div>
-        <div class="joe-overlay-item"><span class="joe-dot"></span>Flags missing info &amp; mismatches</div>
-        <div class="joe-overlay-item"><span class="joe-dot"></span>Spots known faults for the model</div>
-        <div class="joe-overlay-item"><span class="joe-dot"></span>Gives you the exact questions to ask</div>
+    <div class="hero-joe-row">
+      <img class="hero-joe-avatar" src="https://listinglens.app/images/meetjoe.jpg" alt="Joe" />
+      <div class="hero-joe-intro">
+        <div class="hero-joe-name">Meet Joe.</div>
+        <div class="hero-joe-role">He doesn't care about your feelings.<br>He cares about saving you money.</div>
       </div>
     </div>
-    <div class="hero-content">
-      <div class="hero-persona-tag"><span class="hero-persona-dot"></span>AI-Powered Listing Analysis</div>
-      <h1 class="hero-h1">Know exactly<br>what a listing<br><em>really means.</em></h1>
-      <p class="hero-sub">Whether you're buying or selling — Joe scans the screenshots, reads between the lines, and gives you a plain-English verdict in minutes.</p>
-      <div class="hero-actions">
-        <a class='btn-hero-primary' href='/dashboard'>Scan a listing →</a>
-        <a href="#how-it-works" class="btn-hero-secondary">See how it works</a>
-      </div>
-      <div class="hero-price-note"><span>$3</span> per analysis · No subscription · No account required</div>
+    <h1 class="hero-h1">You're about to spend thousands<br>on a listing written by someone<br>who wants your money.<br><em>Joe tells you what they didn't.</em></h1>
+    <p class="hero-sub">Screenshot any listing. Joe scans it like a mechanic who's seen every trick — flags the recalls, calculates the real costs, and gives you the exact questions to ask. Two minutes. Three dollars.</p>
+    <div class="hero-what">
+      <span class="hero-pill"><span class="hero-pill-dot"></span>Active recalls &amp; legal proceedings</span>
+      <span class="hero-pill"><span class="hero-pill-dot"></span>Known faults for the model</span>
+      <span class="hero-pill"><span class="hero-pill-dot"></span>True Day One cost</span>
+      <span class="hero-pill"><span class="hero-pill-dot"></span>Exact questions to ask the seller</span>
     </div>
+    <div class="hero-actions">
+      <a class='btn-hero-primary' href='/dashboard'>Scan a listing →</a>
+      <a href="#how-it-works" class="btn-hero-secondary">See how it works</a>
+    </div>
+    <div class="hero-price-note"><span>$3</span> per report · No subscription · No account required</div>
   </div>
 </div>
 
