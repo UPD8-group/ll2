@@ -46,15 +46,19 @@
     @media(max-width:900px){
       .layout{grid-template-columns:1fr;}
       .sidebar{position:static;}
-      /* When report is ready, flip order: report on top, sidebar below */
-      .layout.report-ready .report-panel{order:-1;}
+      /* Hide report panel and session list on mobile until needed */
+      .report-panel{display:none !important;}
+      .session-card{display:none;}
+      /* When report is ready, show report above sidebar, show session list */
+      .layout.report-ready .report-panel{display:flex !important;order:-1;}
       .layout.report-ready .sidebar{order:2;}
-      /* Collapse sidebar to just the scan button + session list when report showing */
+      .layout.report-ready .session-card{display:block;}
+      /* Collapse sidebar to just the scan button when report showing */
       .layout.report-ready .scan-card .progress-block,
       .layout.report-ready .scan-card .price-row,
       .layout.report-ready .scan-card .upload-hint{display:none;}
     }
-    @media(max-width:600px){.layout{padding:16px;} .report-panel{min-height:60vh;} .report-content{padding:20px 16px 36px;} .panel-header{padding:14px 16px;} .panel-title{font-size:16px;} .counter-ring-svg{width:80px;height:80px;} .counter-number{font-size:48px;}}
+    @media(max-width:600px){.layout{padding:16px;} .report-content{padding:20px 16px 36px;} .panel-header{padding:14px 16px;} .panel-title{font-size:16px;} .counter-ring-svg{width:80px;height:80px;} .counter-number{font-size:48px;}}
 
     /* ── SIDEBAR ── */
     .sidebar{position:sticky;top:82px;display:flex;flex-direction:column;gap:14px;}
@@ -226,7 +230,7 @@
               <circle class="counter-fill" id="counter-ring" cx="50" cy="50" r="45"/>
             </svg>
             <div class="counter-number" id="counter-num">0</div>
-            <div class="counter-pct">% complete</div>
+            <div class="counter-pct" id="counter-unit">seconds</div>
             <div class="counter-step-label" id="counter-label">Preparing…</div>
           </div>
           <div class="step-list" id="step-list"></div>
@@ -350,7 +354,7 @@ const STEPS = [
   { label: "Assembling Joe's verdict",                  pct: 94 },
 ];
 // When each step label appears (ms). Counter runs independently.
-const STEP_TIMES = [800, 3000, 6000, 10000, 15000, 21000, 27000];
+const STEP_TIMES = [2000, 10000, 22000, 36000, 52000, 66000, 78000];
 const SKEL_UNLOCK = { 1:"sk2", 2:"sk3", 3:"sk4", 4:"sk5", 5:"sk6" };
 
 // ── STATE ──
@@ -359,13 +363,10 @@ let stripe        = null, cardElement = null;
 let pendingSessionId = null;
 let pendingFileCount = 0;
 let cases = [], currentCaseId = null, caseCounter = 1;
-let reportDone    = false;   // true once backend returns
-let reportPayload = null;    // holds job result until counter reaches 100
-
-// Counter state — physics based
-let counterVal    = 0;       // current displayed value (float)
-let counterTarget = 0;       // what we're animating toward
-let counterRafId  = null;
+// Counter state — simple seconds timer
+let counterSeconds = 0;       // current elapsed seconds
+let counterIntervalId = null;
+let reportDone    = false;
 let stepTimers    = [];
 
 const $ = id => document.getElementById(id);
@@ -388,74 +389,41 @@ const panelScore    = $('panel-score');
 const noCases       = $('no-cases');
 
 // ── COUNTER ENGINE ──
-// Uses exponential decay so it naturally slows near the target.
-// It will NEVER reach 100 on its own — only when we call finishCounter().
+// Simple 1-second tick. Ring fills over 90 seconds.
+// If report arrives early, stops and shows done.
+// If it takes longer than 90, keeps counting (no stall).
 const CIRCUMFERENCE = 2 * Math.PI * 45; // 283
+const ESTIMATED_SECONDS = 90;
 
-function setCounterDisplay(val) {
-  const v = Math.min(100, Math.max(0, val));
-  const display = Math.floor(v);
-  counterNum.textContent = display;
-  // SVG ring
-  const offset = CIRCUMFERENCE - (v / 100) * CIRCUMFERENCE;
+function setCounterDisplay(seconds) {
+  counterNum.textContent = seconds;
+  // Ring fills proportionally — caps at full circle
+  const pct = Math.min(seconds / ESTIMATED_SECONDS, 1);
+  const offset = CIRCUMFERENCE - (pct * CIRCUMFERENCE);
   counterRing.style.strokeDashoffset = offset;
 }
 
-function counterTick() {
-  const gap = counterTarget - counterVal;
-  if (gap > 0.02) {
-    // Ease toward target — minimum 0.06%/frame so it NEVER visually stalls
-    const speed = Math.max(gap * 0.035, 0.06);
-    counterVal += speed;
-    setCounterDisplay(counterVal);
-  }
-  counterRafId = requestAnimationFrame(counterTick);
-}
-
 function startCounter() {
-  counterVal = 0; counterTarget = 0; reportDone = false; reportPayload = null;
+  counterSeconds = 0;
+  reportDone = false;
   setCounterDisplay(0);
   counterRing.classList.add('pulsing');
-  counterRafId = requestAnimationFrame(counterTick);
-
-  // Gradually push target forward on a schedule — but cap at 94
-  // so it never autonomously reaches 100.
-  const schedule = [
-    [600,   8],
-    [2000,  20],
-    [4500,  35],
-    [7500,  50],
-    [12000, 63],
-    [18000, 75],
-    [24000, 85],
-    [32000, 91],
-    [42000, 94],   // max autonomous value
-  ];
-  schedule.forEach(([delay, target]) => {
-    const t = setTimeout(() => {
-      // Only advance if we haven't finished yet
-      if (!reportDone) counterTarget = target;
-    }, delay);
-    stepTimers.push(t);
-  });
+  counterIntervalId = setInterval(() => {
+    if (reportDone) return;
+    counterSeconds++;
+    setCounterDisplay(counterSeconds);
+  }, 1000);
 }
 
 function finishCounter(cb) {
   reportDone = true;
-  counterTarget = 100;
   counterRing.classList.remove('pulsing');
-  // Wait for animation to visually reach 100 then fire callback
-  const check = setInterval(() => {
-    if (counterVal >= 99.5) {
-      clearInterval(check);
-      setCounterDisplay(100);
-      setTimeout(cb, 400);
-    }
-  }, 50);
+  // Brief pause then callback
+  setTimeout(cb, 600);
 }
 
 function stopCounter() {
-  if (counterRafId) { cancelAnimationFrame(counterRafId); counterRafId = null; }
+  if (counterIntervalId) { clearInterval(counterIntervalId); counterIntervalId = null; }
   stepTimers.forEach(clearTimeout); stepTimers = [];
   counterRing.classList.remove('pulsing');
 }
@@ -732,9 +700,8 @@ async function handleScan(files) {
     if (appConfig.betaMode) {
       await startReportGeneration(sessionId, null);
     } else {
-      // Pause counter at ~12, show payment form
-      counterTarget = 12;
-      stopCounter(); // stop advancing, user needs to pay
+      // Pause timer, show payment form
+      stopCounter();
       sidebar.classList.remove('scanning');
       $('payment-wrap').style.display = 'block';
       $('pay-btn').disabled = false;
