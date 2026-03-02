@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bob — ASX Scanner</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a0a0f;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    h1 span { color: #6366f1; }
+
+    .subtitle {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      max-width: 800px;
+      margin-bottom: 40px;
+    }
+
+    textarea {
+      flex: 1;
+      background: #13131a;
+      border: 1px solid #1e1e2e;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      padding: 14px 16px;
+      resize: none;
+      height: 56px;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #6366f1; }
+
+    button {
+      background: #6366f1;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0 24px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: #4f46e5; }
+    button:disabled { background: #2d2d3a; color: #4a4a5a; cursor: not-allowed; }
+
+    .status {
+      color: #6366f1;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+      min-height: 20px;
+    }
+
+    .top-pick {
+      background: #13131a;
+      border: 1px solid #6366f1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      max-width: 800px;
+      margin-bottom: 24px;
+    }
+
+    .top-pick h3 { color: #6366f1; font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .top-pick p { font-size: 0.95rem; }
+
+    .cards { display: flex; flex-direction: column; gap: 16px; max-width: 800px; }
+
+    .card {
+      background: #13131a;
+      border: 1px solid #1e1e2e;
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .card:hover { border-color: #2d2d4a; }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .card-title { font-size: 1.05rem; font-weight: 600; }
+    .card-meta { color: #64748b; font-size: 0.8rem; margin-top: 3px; }
+
+    .badge {
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+
+    .badge.strong { background: #14532d; color: #4ade80; }
+    .badge.watch  { background: #1c3a5a; color: #60a5fa; }
+    .badge.pass   { background: #2d1515; color: #f87171; }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .composite {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #6366f1;
+      line-height: 1;
+    }
+
+    .composite span { font-size: 0.9rem; color: #64748b; font-weight: 400; }
+
+    .bars { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+    .bar-item { display: flex; align-items: center; gap: 8px; }
+
+    .bar-label { color: #64748b; font-size: 0.72rem; width: 90px; flex-shrink: 0; }
+
+    .bar-track {
+      flex: 1;
+      background: #1e1e2e;
+      border-radius: 4px;
+      height: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: #6366f1;
+      transition: width 0.6s ease;
+    }
+
+    .bar-fill.high   { background: #4ade80; }
+    .bar-fill.medium { background: #6366f1; }
+    .bar-fill.low    { background: #f87171; }
+
+    .one-liner { color: #94a3b8; font-size: 0.85rem; margin-bottom: 12px; }
+
+    .flags { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .flag {
+      border-radius: 5px;
+      font-size: 0.72rem;
+      padding: 3px 8px;
+    }
+
+    .flag.green { background: #0d2a1a; color: #4ade80; }
+    .flag.red   { background: #1f0d0d; color: #f87171; }
+
+    .presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+
+    .preset {
+      background: #13131a;
+      border: 1px solid #1e1e2e;
+      border-radius: 8px;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      transition: all 0.2s;
+    }
+
+    .preset:hover { border-color: #6366f1; color: #e2e8f0; }
+  </style>
+</head>
+<body>
+
+  <h1>B<span>o</span>b</h1>
+  <p class="subtitle">ASX Market Scanner — powered by Claude</p>
+
+  <div class="search-row">
+    <textarea id="query" placeholder="e.g. ASX small-cap tech under $500M with strong revenue growth and recent placements"></textarea>
+    <button id="scanBtn" onclick="runScan()">Scan</button>
+  </div>
+
+  <div class="presets">
+    <div class="preset" onclick="setPreset(this)">ASX tech under $500M, strong revenue growth</div>
+    <div class="preset" onclick="setPreset(this)">ASX healthcare with recent IPOs or placements</div>
+    <div class="preset" onclick="setPreset(this)">ASX gold and rare earths gaining momentum</div>
+    <div class="preset" onclick="setPreset(this)">ASX SaaS with high switching costs and recurring revenue</div>
+    <div class="preset" onclick="setPreset(this)">ASX small-cap with upcoming catalysts</div>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div id="topPick"></div>
+  <div class="cards" id="cards"></div>
+
+  <script>
+    function setPreset(el) {
+      document.getElementById("query").value = el.textContent;
+    }
+
+    function badgeClass(rec) {
+      if (!rec) return "watch";
+      const r = rec.toUpperCase();
+      if (r.includes("STRONG")) return "strong";
+      if (r.includes("PASS")) return "pass";
+      return "watch";
+    }
+
+    function barClass(score) {
+      if (score >= 7) return "high";
+      if (score >= 4) return "medium";
+      return "low";
+    }
+
+    function formatLabel(key) {
+      return key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function renderResults(data) {
+      const topPick = document.getElementById("topPick");
+      const cards = document.getElementById("cards");
+
+      topPick.innerHTML = "";
+      cards.innerHTML = "";
+
+      if (data.top_pick) {
+        topPick.innerHTML = `
+          <div class="top-pick">
+            <h3>⭐ Top Pick</h3>
+            <p><strong>${data.top_pick}</strong> — ${data.top_pick_reason || ""}</p>
+          </div>`;
+      }
+
+      (data.companies || []).forEach(co => {
+        const scores = co.category_scores || {};
+        const barsHTML = Object.entries(scores).map(([k, v]) => `
+          <div class="bar-item">
+            <span class="bar-label">${formatLabel(k)}</span>
+            <div class="bar-track">
+              <div class="bar-fill ${barClass(v)}" style="width:${v * 10}%"></div>
+            </div>
+          </div>`).join("");
+
+        const greenFlags = (co.green_flags || []).map(f => `<span class="flag green">✓ ${f}</span>`).join("");
+        const redFlags   = (co.red_flags   || []).map(f => `<span class="flag red">✗ ${f}</span>`).join("");
+
+        cards.innerHTML += `
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">${co.name} <span style="color:#6366f1">${co.asx_code || ""}</span></div>
+                <div class="card-meta">${co.sector || ""} · ${co.market_cap || ""}</div>
+              </div>
+              <span class="badge ${badgeClass(co.recommendation)}">${co.recommendation || "WATCH"}</span>
+            </div>
+            <div class="score-row">
+              <div class="composite">${co.composite_score || "—"}<span>/100</span></div>
+              <div class="bars">${barsHTML}</div>
+            </div>
+            <div class="one-liner">${co.one_liner || ""}</div>
+            <div class="flags">${greenFlags}${redFlags}</div>
+          </div>`;
+      });
+    }
+
+    async function runScan() {
+      const query = document.getElementById("query").value.trim();
+      if (!query) return;
+
+      const btn = document.getElementById("scanBtn");
+      const status = document.getElementById("status");
+
+      btn.disabled = true;
+      btn.textContent = "Scanning…";
+      status.textContent = "Bob is searching the ASX — this takes 20–40 seconds…";
+      document.getElementById("topPick").innerHTML = "";
+      document.getElementById("cards").innerHTML = "";
+
+      try {
+        const res = await fetch("/.netlify/functions/bob-scanner", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query })
+        });
+
+        const data = await res.json();
+
+        if (data.parse_error) {
+          status.textContent = "Got a response but couldn't parse it. Raw output below.";
+          document.getElementById("cards").innerHTML = `<pre style="color:#94a3b8;font-size:0.75rem;white-space:pre-wrap">${data.raw}</pre>`;
+        } else if (data.error) {
+          status.textContent = "Error: " + data.error;
+        } else {
+          status.textContent = `Scan complete — ${(data.companies || []).length} companies found.`;
+          renderResults(data);
+        }
+
+      } catch (err) {
+        status.textContent = "Request failed: " + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Scan";
+      }
+    }
+
+    document.getElementById("query").addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); runScan(); }
+    });
+  </script>
+
+</body>
+</html>
