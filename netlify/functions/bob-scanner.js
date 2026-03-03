@@ -14,51 +14,8 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: "Missing query" };
   }
 
-  const SYSTEM_PROMPT = `You are Bob, an ASX investment analyst. When given a search instruction, you must:
-
-1. Use web search to find 3-5 real ASX-listed companies matching the criteria.
-2. For each company, gather enough data to score it across these 8 category scores (each scored 1-10):
-   - business_quality (revenue growth, margins, cash flow, recurring revenue)
-   - balance_sheet (debt, cash runway, dilution history)
-   - valuation (EV/Revenue, P/E, discount to peers)
-   - management (founder-led, skin in game, track record)
-   - moat (switching costs, TAM, mission-critical, disruption risk)
-   - momentum (price vs ASX, broker sentiment, short interest)
-   - news_flow (recent announcements, media sentiment, guidance reliability)
-   - deal_quality (if applicable: underwriter, cornerstones, vendor selldown)
-
-3. Return ONLY a valid JSON object. No preamble. No markdown. No explanation outside the JSON.
-
-JSON format:
-{
-  "query": "the search query used",
-  "scan_date": "today's date",
-  "companies": [
-    {
-      "name": "Company Name",
-      "asx_code": "ASX:XXX",
-      "sector": "sector name",
-      "market_cap": "$XXXm",
-      "composite_score": 0-100,
-      "category_scores": {
-        "business_quality": 0,
-        "balance_sheet": 0,
-        "valuation": 0,
-        "management": 0,
-        "moat": 0,
-        "momentum": 0,
-        "news_flow": 0,
-        "deal_quality": 0
-      },
-      "recommendation": "STRONG INTEREST | WORTH WATCHING | PASS",
-      "green_flags": ["flag1", "flag2"],
-      "red_flags": ["flag1", "flag2"],
-      "one_liner": "One sentence summary of the opportunity"
-    }
-  ],
-  "top_pick": "ASX:XXX",
-  "top_pick_reason": "Why this one stands out"
-}`;
+  const SYSTEM_PROMPT = `You are Bob, an ASX investment analyst. Find 3 real ASX companies matching the user's query using web search. Score each on 8 factors (1-10): business_quality, balance_sheet, valuation, management, moat, momentum, news_flow, deal_quality. Return ONLY valid JSON, no markdown, no preamble:
+{"query":"","scan_date":"","companies":[{"name":"","asx_code":"ASX:XXX","sector":"","market_cap":"","composite_score":0,"category_scores":{"business_quality":0,"balance_sheet":0,"valuation":0,"management":0,"moat":0,"momentum":0,"news_flow":0,"deal_quality":0},"recommendation":"STRONG INTEREST|WORTH WATCHING|PASS","green_flags":[],"red_flags":[],"one_liner":""}],"top_pick":"ASX:XXX","top_pick_reason":""}`;
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -70,20 +27,10 @@ JSON format:
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 4000,
+        max_tokens: 2000,
         system: SYSTEM_PROMPT,
-        tools: [
-          {
-            type: "web_search_20250305",
-            name: "web_search"
-          }
-        ],
-        messages: [
-          {
-            role: "user",
-            content: query
-          }
-        ]
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{ role: "user", content: query }]
       })
     });
 
@@ -96,11 +43,8 @@ JSON format:
       };
     }
 
-    // Extract the final text block (last text content after tool use)
     const textBlocks = data.content.filter(b => b.type === "text");
     const rawText = textBlocks.map(b => b.text).join("");
-
-    // Strip any accidental markdown fences
     const clean = rawText.replace(/```json|```/g, "").trim();
 
     let parsed;
